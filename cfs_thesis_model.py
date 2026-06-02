@@ -2,7 +2,6 @@
 ═══════════════════════════════════════════════════════════════════════════════
 CFS MULTI-OBJECTIVE OPTIMIZATION FRAMEWORK —
 Cold-Formed Steel Residential Framing — NSGA-II Implementation
-Master's Thesis: Parametric Design Optimization Tool
 ═══════════════════════════════════════════════════════════════════════════════
 Market references (2025 NZ):
   - Steel supply-fabricate: NZ$4.50–7.00/kg (SCNZ 2024, fabricator quotes)
