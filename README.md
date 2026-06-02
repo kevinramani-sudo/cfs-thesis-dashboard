@@ -10,7 +10,7 @@ The dashboard presents CFS framing process cost, CFS framing A1–A5 embodied ca
 
 Dashboard link:
 
-https://kevinramani-sudo.github.io/cfs-thesis-dashboard/
+https://kevinramani-sudo.github.io/cfs-thesis-dashboard/dashboard/
 
 ## Repository Contents
 
