@@ -1,0 +1,6 @@
+Solution,R_p_panel_rationalisation,R_t_truss_rationalisation,panel_scheme,truss_scheme,opening_complexity_index,P_f_prefab_level,C_steel,C_factory_processing,C_setup,C_site_labour,C_transport,C_delivery_logistics,C_site_mobilisation,C_opening_standardisation,C_opening_complexity,C_waste_handling,C_overhead,C_total,Total_cost_NZD,Cost_vs_S2_%
+Cost-min,0.6895,0.6785,2,2,1.0,0.7083,5201.85,7033.64,1147.8,1912.44,835.6,98.04,144.0,0.0,0.0,27.09,1640.05,18040.5,18040.5,-1.61
+Carbon-min,0.6895,0.6811,2,2,1.0,0.9,5173.4,10109.13,1147.4,1707.77,853.57,103.52,144.0,0.0,0.0,26.94,1926.57,21192.3,21192.3,15.58
+Time-min,0.7529,0.7217,3,2,0.8,0.7825,5217.79,7316.64,1126.54,1689.28,848.88,99.77,144.0,114.65,0.0,27.18,1658.47,18243.19,18243.19,-0.5
+Knee/balanced,0.6907,0.6799,2,2,1.0,0.8184,5186.3,7606.55,1147.25,1711.06,846.1,100.76,144.0,0.0,0.0,27.01,1676.9,18445.94,18445.94,0.6
+S2 reference,0.0,0.0,0,0,1.0,0.72,5268.63,6822.88,1495.0,1989.4,823.18,98.08,144.0,0.0,0.0,27.44,1666.86,18335.47,18335.47,-0.0

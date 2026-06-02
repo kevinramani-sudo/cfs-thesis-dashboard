@@ -1,0 +1,5 @@
+Profile,Best_solution,R_p_panel_rationalisation,R_t_truss_rationalisation,panel_scheme,truss_scheme,opening_complexity_index,P_f_prefab_level,Cost_NZD,Carbon_kgCO2e,Time_hours,Cost_vs_S2_%,Carbon_vs_S2_%,Time_vs_S2_%,TOPSIS_score
+Cost_priority,P763,0.7034,0.6926,2,2,0.998,0.7783,18087.0,5271.19,88.69,-1.36,-1.78,-5.57,0.9688
+Carbon_priority,P1254,0.7003,0.6863,2,2,1.0,0.7916,18132.57,5264.52,88.77,-1.11,-1.91,-5.48,0.8945
+Time_priority,P2065,0.7105,0.6839,2,2,0.811,0.7825,18216.53,5289.4,87.68,-0.65,-1.44,-6.65,0.9689
+Balanced,P1504,0.7016,0.7069,2,2,0.898,0.7817,18157.27,5280.55,88.14,-0.97,-1.61,-6.16,0.942

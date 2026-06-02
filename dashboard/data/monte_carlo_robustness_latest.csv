@@ -1,0 +1,5 @@
+Solution,Cost_p05_NZD,Cost_p50_NZD,Cost_p95_NZD,Cost_CV_%,P_cost_below_official_S2_%,P_cost_better_than_paired_S2_%,Carbon_p05_kgCO2e,Carbon_p50_kgCO2e,Carbon_p95_kgCO2e,Carbon_CV_%,P_carbon_below_official_S2_%,P_carbon_better_than_paired_S2_%,Time_p05_hrs,Time_p50_hrs,Time_p95_hrs,Time_CV_%,P_time_below_official_S2_%,P_time_better_than_paired_S2_%,Mean_norm_performance,Uncertainty_penalty,Paired_probability_benefit,Robust_score,Robust_rank
+Cost-min,16472.0,18659.0,20879.0,7.42,43.1,100.0,3993.0,5413.0,6844.0,17.23,48.8,100.0,88.8,90.4,92.3,1.17,100.0,100.0,0.9966,0.0869,1.0,0.94,1
+Time-min,16495.0,18792.0,21171.0,7.83,39.6,69.9,3995.0,5505.0,6848.0,16.84,45.9,100.0,85.4,87.6,89.9,1.59,100.0,100.0,0.992,0.0888,0.8495,0.9515,2
+Knee/balanced,16804.0,19116.0,21420.0,7.59,33.0,17.1,3958.0,5333.0,6808.0,17.0,51.1,100.0,87.2,90.0,92.8,1.94,99.5,100.0,1.0,0.0892,0.5855,0.9861,3
+Carbon-min,18993.0,22069.0,25041.0,8.83,0.7,0.0,3963.0,5424.0,6751.0,16.61,48.3,100.0,97.9,102.0,105.9,2.53,0.0,0.0,1.0958,0.1,0.25,1.1207,4

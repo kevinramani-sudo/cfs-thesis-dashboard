@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CFS NSGA-II Decision Dashboard — Python-Aligned Research Version</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+:root{
+  --bg:#0d1117;--bg2:#111827;--bg3:#172033;--card:#151d2e;--card2:#1b263b;
+  --border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.16);
+  --text:#e5e7eb;--muted:#94a3b8;--muted2:#64748b;
+  --cost:#60a5fa;--carbon:#34d399;--time:#fbbf24;--accent:#a78bfa;--red:#f87171;--white:#f8fafc;
+  --mono:'JetBrains Mono',ui-monospace,monospace;--sans:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(circle at 80% 0%,rgba(96,165,250,.08),transparent 28%),radial-gradient(circle at 15% 12%,rgba(52,211,153,.06),transparent 22%),var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.5;min-height:100vh}
+.app{display:grid;grid-template-columns:285px 1fr;min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;overflow:auto;background:linear-gradient(180deg,#0f172a,#0b1020);border-right:1px solid var(--border);padding:22px 0}
+.brand{padding:0 22px 22px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.brand-kicker{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.brand-title{font-size:20px;line-height:1.15;font-weight:800;color:var(--white)}
+.brand-sub{font-family:var(--mono);font-size:11px;color:var(--carbon);margin-top:7px}
+.nav-title{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--muted2);padding:16px 22px 7px}
+.nav-item{display:flex;gap:10px;align-items:center;padding:10px 22px;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:.15s;font-size:13px}
+.nav-item:hover{background:rgba(255,255,255,.035);color:var(--text)}
+.nav-item.active{background:rgba(52,211,153,.06);border-left-color:var(--carbon);color:var(--carbon)}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.s2-card{margin:20px 22px 0;padding:14px;background:rgba(21,29,46,.86);border:1px solid var(--border2);border-radius:12px}
+.s2-title{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px}
+.s2-row{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:11px;margin:5px 0;color:var(--muted)}
+.s2-row b{color:var(--text);font-weight:600;text-align:right}
+.main{padding:28px;min-width:0}.page{display:none}.page.active{display:block}
+.header{margin-bottom:22px}.title{font-size:29px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}.desc{color:var(--muted);max-width:1050px}.scope{margin-top:12px;padding:12px 14px;border:1px solid rgba(251,191,36,.28);background:rgba(251,191,36,.06);color:#fde68a;border-radius:10px;font-family:var(--mono);font-size:11px;max-width:1100px}
+.notice{margin-top:12px;padding:12px 14px;border:1px solid rgba(52,211,153,.28);background:rgba(52,211,153,.055);color:#bbf7d0;border-radius:10px;font-family:var(--mono);font-size:11px;max-width:1100px}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:18px}.metric{position:relative;padding:18px;background:rgba(21,29,46,.93);border:1px solid var(--border);border-radius:14px;overflow:hidden}.metric:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:var(--line,var(--carbon))}.metric.cost{--line:var(--cost)}.metric.carbon{--line:var(--carbon)}.metric.time{--line:var(--time)}
+.metric-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);margin-bottom:8px}.metric-value{font-size:30px;font-weight:800;line-height:1}.metric-value.cost{color:var(--cost)}.metric-value.carbon{color:var(--carbon)}.metric-value.time{color:var(--time)}.metric-unit{font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:4px}.delta{position:absolute;right:16px;top:16px;font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:999px}.good{background:rgba(52,211,153,.12);color:var(--carbon)}.bad{background:rgba(248,113,113,.13);color:var(--red)}.flat{background:rgba(251,191,36,.12);color:var(--time)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:18px}.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.panel{background:rgba(21,29,46,.93);border:1px solid var(--border);border-radius:14px;padding:18px;min-width:0}.panel-title{font-weight:700;font-size:14px;margin-bottom:4px}.panel-desc{font-size:12px;color:var(--muted);margin-bottom:14px}.small-card{background:rgba(27,38,59,.72);border:1px solid var(--border);border-radius:12px;padding:13px}.small-card .tag{font-family:var(--mono);font-size:10px;text-transform:uppercase;color:var(--carbon);letter-spacing:.12em;margin-bottom:5px}.small-card .body{font-size:12px;color:var(--muted)}
+.slider-group{margin-bottom:18px}.slider-head{display:flex;justify-content:space-between;gap:14px;align-items:baseline;margin-bottom:7px}.slider-label{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.08em}.slider-value{font-family:var(--mono);font-size:12px;color:var(--white);font-weight:600}.hint{font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:5px}input[type=range]{width:100%;height:5px;appearance:none;-webkit-appearance:none;background:var(--bg3);border-radius:999px;outline:none;cursor:pointer}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--thumb,var(--accent));box-shadow:0 0 0 4px rgba(255,255,255,.04)}input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:var(--thumb,var(--accent))}.rp{--thumb:var(--cost)}.rt{--thumb:var(--accent)}.oc{--thumb:var(--time)}.pf{--thumb:var(--carbon)}
+.button-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}.btn,.file-label{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;border:1px solid var(--border2);background:var(--card2);color:var(--text);font-family:var(--mono);font-size:12px;cursor:pointer;transition:.15s;text-decoration:none}.btn:hover,.file-label:hover{border-color:var(--carbon);color:var(--carbon);background:#152238}.chart{position:relative;height:260px}
+.chart.tall{height:330px}
+.chart canvas{width:100% !important;height:100% !important;display:block}
+.chart.parallel-chart{height:760px;min-height:760px;width:100%}
+#parallel{width:100% !important;height:100% !important;display:block}
+#tab-pparallel .panel{min-height:900px}
+#parallel-axis-table{margin-top:16px}
+.table-wrap{overflow:auto;max-height:560px}.tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}.tbl th{position:sticky;top:0;background:#111827;color:var(--muted);text-align:left;border-bottom:1px solid var(--border2);padding:9px 10px;text-transform:uppercase;letter-spacing:.06em;font-size:10px}.tbl td{border-bottom:1px solid var(--border);padding:9px 10px;white-space:nowrap}.tbl tr:hover td{background:rgba(255,255,255,.025)}.clickable{cursor:pointer}.pos{color:var(--red)}.neg{color:var(--carbon)}.zero{color:var(--time)}
+.breakdown{display:flex;flex-direction:column;gap:8px}.bar-row{display:grid;grid-template-columns:150px 1fr 85px;gap:10px;align-items:center}.bar-label{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right}.bar-wrap{height:17px;background:var(--bg3);border-radius:5px;overflow:hidden}.bar{height:100%;border-radius:5px}.bar.blue{background:rgba(96,165,250,.45)}.bar.green{background:rgba(52,211,153,.45)}.bar.yellow{background:rgba(251,191,36,.45)}.bar.red{background:rgba(248,113,113,.45)}.bar-val{font-family:var(--mono);font-size:11px;text-align:right;color:var(--text)}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:18px}.tab{padding:10px 16px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;font-size:13px}.tab:hover{color:var(--text)}.tab.active{color:var(--carbon);border-bottom-color:var(--carbon)}.tabpane{display:none}.tabpane.active{display:block}
+.status{display:flex;gap:8px;align-items:flex-start;font-family:var(--mono);font-size:11px;margin:6px 0;color:var(--muted)}.dot{margin-top:4px;width:8px;height:8px;border-radius:50%;background:var(--carbon);flex:0 0 auto}.dot.warn{background:var(--time)}.dot.bad{background:var(--red)}.decision-box{background:rgba(27,38,59,.72);border-left:4px solid var(--carbon);padding:16px;border-radius:10px;min-height:165px;font-family:var(--mono);font-size:12px;color:var(--text)}
+@media(max-width:1120px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.metrics,.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.main{padding:18px}.bar-row{grid-template-columns:1fr}.bar-label{text-align:left}.bar-val{text-align:left}}
+
+code{font-family:var(--mono);font-size:11px;color:#bfdbfe}
+.audit-badge{display:inline-block;margin:3px 5px 3px 0;padding:3px 8px;border-radius:999px;border:1px solid var(--border2);font-family:var(--mono);font-size:10px}
+.audit-ok{color:var(--carbon);background:rgba(52,211,153,.08)}
+.audit-warn{color:var(--time);background:rgba(251,191,36,.08)}
+.audit-bad{color:var(--red);background:rgba(248,113,113,.08)}
+
+.scenario-input{width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
+.scenario-input:focus{border-color:var(--carbon);box-shadow:0 0 0 3px rgba(52,211,153,.08)}
+.scenario-field{margin-bottom:13px}
+.scenario-field label{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px}
+.scenario-field span{color:var(--muted2);text-transform:none;letter-spacing:0}
+.warning-strong{margin-top:12px;padding:12px 14px;border:1px solid rgba(248,113,113,.32);background:rgba(248,113,113,.07);color:#fecaca;border-radius:10px;font-family:var(--mono);font-size:11px;max-width:1100px}
+.run-status{margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-kicker">Civil / Structural Engineering</div>
+      <div class="brand-title">CFS Multi-Objective Decision Dashboard</div>
+      <div class="brand-sub">Python-aligned NSGA-II + LHS + Monte Carlo support layer</div>
+    </div>
+    <div class="nav-title">Navigation</div>
+    <div class="nav-item active" onclick="showPage('design')"><span class="nav-dot"></span>Design Explorer</div>
+    <div class="nav-item" onclick="showPage('pareto')"><span class="nav-dot"></span>Pareto Explorer</div>
+    <div class="nav-item" onclick="showPage('scenario')"><span class="nav-dot"></span>Scenario Comparison</div>
+    <div class="nav-item" onclick="showPage('sensitivity')"><span class="nav-dot"></span>Sensitivity & Robustness</div>
+    <div class="nav-item" onclick="showPage('decision')"><span class="nav-dot"></span>Decision Ranking</div>
+    <div class="nav-item" onclick="showPage('audit')"><span class="nav-dot"></span>Model & Data Audit</div>
+    <div class="nav-item" onclick="showPage('data')"><span class="nav-dot"></span>Data Import / Export</div>
+    <div class="s2-card">
+      <div class="s2-title">Model-calculated S2</div>
+      <div class="s2-row"><span>Cost</span><b id="badge-cost">—</b></div>
+      <div class="s2-row"><span>Carbon</span><b id="badge-carbon">—</b></div>
+      <div class="s2-row"><span>Time</span><b id="badge-time">—</b></div>
+      <div class="s2-row"><span>x_ref</span><b>[0, 0, 1.00, 0.72]</b></div>
+      <div class="s2-row"><span>Data</span><b id="badge-mode">Embedded</b></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <section id="page-design" class="page active">
+      <div class="header">
+        <div class="title">Design Explorer</div>
+        <div class="desc">Interactive dashboard using the same four-variable response logic as the current Python model: panel rationalisation intensity, truss rationalisation intensity, opening/detailing complexity, and prefabrication level.</div>
+        <div class="scope">Scope: CFS framing process cost, CFS framing A1–A5 embodied carbon, and construction process-hours only. This dashboard is a decision-support layer, not a structural design, consent, quantity-surveying, or scheduling substitute.</div>
+      </div>
+      <div class="metrics">
+        <div class="metric cost"><div class="metric-label">CFS process cost</div><div class="metric-value cost" id="m-cost">—</div><div class="metric-unit">NZD</div><div class="delta" id="d-cost">—</div></div>
+        <div class="metric carbon"><div class="metric-label">CFS A1–A5 carbon</div><div class="metric-value carbon" id="m-carbon">—</div><div class="metric-unit">kgCO₂e</div><div class="delta" id="d-carbon">—</div></div>
+        <div class="metric time"><div class="metric-label">Process-hours</div><div class="metric-value time" id="m-time">—</div><div class="metric-unit">hours, not calendar duration</div><div class="delta" id="d-time">—</div></div>
+      </div>
+      <div class="grid-4">
+        <div class="small-card"><div class="tag">Variable 1</div><div class="body"><b>R_p</b> continuous panel rationalisation intensity.</div></div>
+        <div class="small-card"><div class="tag">Variable 2</div><div class="body"><b>R_t</b> continuous truss rationalisation intensity.</div></div>
+        <div class="small-card"><div class="tag">Variable 3</div><div class="body"><b>OC</b> opening/detailing complexity index.</div></div>
+        <div class="small-card"><div class="tag">Variable 4</div><div class="body"><b>P_f</b> prefabrication level.</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title">Current design vector</div>
+          <div class="panel-desc">These are the actual optimisation variables used in the Python model. Scheme labels are reporting categories mapped from R_p and R_t.</div>
+          <div class="slider-group"><div class="slider-head"><span class="slider-label">R_p — panel rationalisation</span><span class="slider-value" id="rp-val">0.000</span></div><input class="rp" id="rp" type="range" min="0" max="1000" value="0" oninput="updateAll()"><div class="hint" id="rp-hint">Mapped panel category: S0 baseline-like</div></div>
+          <div class="slider-group"><div class="slider-head"><span class="slider-label">R_t — truss rationalisation</span><span class="slider-value" id="rt-val">0.000</span></div><input class="rt" id="rt" type="range" min="0" max="1000" value="0" oninput="updateAll()"><div class="hint" id="rt-hint">Mapped truss category: T0 baseline-like</div></div>
+          <div class="slider-group"><div class="slider-head"><span class="slider-label">OC — opening/detailing complexity</span><span class="slider-value" id="oc-val">1.000</span></div><input class="oc" id="oc" type="range" min="800" max="1300" value="1000" oninput="updateAll()"><div class="hint" id="oc-hint">OC = 1.00 is the S2 reference detailing complexity</div></div>
+          <div class="slider-group"><div class="slider-head"><span class="slider-label">P_f — prefabrication level</span><span class="slider-value" id="pf-val">0.720</span></div><input class="pf" id="pf" type="range" min="500" max="900" value="720" oninput="updateAll()"><div class="hint" id="pf-hint">S2 medium-prefabrication reference</div></div>
+          <div class="panel-desc" style="margin-top:10px">Constructability screening</div>
+          <div id="constraint-status"></div>
+          <div class="button-row"><button class="btn" onclick="resetDesign()">Reset to S2</button><button class="btn" onclick="copyCurrentJSON()">Copy JSON</button><button class="btn" onclick="downloadCurrentCSV()">Export CSV</button></div>
+        </div>
+        <div class="panel"><div class="panel-title">Objective profile</div><div class="panel-desc">Normalised objective values. Values below 1.0 improve relative to the current S2 reference.</div><div class="chart tall"><canvas id="radar"></canvas></div></div>
+      </div>
+      <div class="grid-3">
+        <div class="panel"><div class="panel-title">Cost components</div><div class="panel-desc">Current design, direct cost plus overhead.</div><div class="breakdown" id="bd-cost"></div></div>
+        <div class="panel"><div class="panel-title">Carbon components</div><div class="panel-desc">A1–A5 CFS framing carbon boundary.</div><div class="breakdown" id="bd-carbon"></div></div>
+        <div class="panel"><div class="panel-title">Time components</div><div class="panel-desc">Factory + site process-hours.</div><div class="breakdown" id="bd-time"></div></div>
+      </div>
+    </section>
+
+    <section id="page-pareto" class="page">
+      <div class="header"><div class="title">Pareto Explorer</div><div class="desc">Uses imported Python NSGA-II results when available. Without import, it uses an embedded nondominated grid surrogate for interaction and demonstration.</div><div class="scope">Use imported optimisation result tables for final decisions. The embedded front is only a fallback demonstration dataset.</div></div>
+      <div class="tabs"><div class="tab active" data-tab="p2d" onclick="showTab('p2d')">2D Fronts</div><div class="tab" data-tab="ptable" onclick="showTab('ptable')">Representative Table</div><div class="tab" data-tab="pparallel" onclick="showTab('pparallel')">Parallel Coordinates</div></div>
+      <div id="tab-p2d" class="tabpane active"><div class="grid-3"><div class="panel"><div class="panel-title">Cost vs Carbon</div><div class="chart"><canvas id="pc-cost-carbon"></canvas></div></div><div class="panel"><div class="panel-title">Cost vs Time</div><div class="chart"><canvas id="pc-cost-time"></canvas></div></div><div class="panel"><div class="panel-title">Carbon vs Time</div><div class="chart"><canvas id="pc-carbon-time"></canvas></div></div></div><div class="panel"><div class="panel-title">P_f sweep at current R_p, R_t and OC</div><div class="panel-desc">Shows how prefabrication level changes objectives under the current recalibration setting.</div><div class="chart"><canvas id="pf-sweep"></canvas></div></div></div>
+      <div id="tab-ptable" class="tabpane"><div class="panel"><div class="panel-title">Representative / imported solutions</div><div class="panel-desc">Click a row to load the design into the Design Explorer.</div><div class="table-wrap"><table class="tbl" id="rep-table"></table></div></div></div>
+      <div id="tab-pparallel" class="tabpane">
+        <div class="panel">
+          <div class="panel-title">Parallel coordinates</div>
+          <div class="panel-desc">Nondominated alternatives across variables and objectives. Lines are stratified from the imported Python Pareto front so the plot remains readable.</div>
+          <div class="chart parallel-chart"><canvas id="parallel"></canvas></div>
+          <div id="parallel-axis-table"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-scenario" class="page">
+      <div class="header">
+        <div class="title">Scenario Assumptions / Recalibration Check</div>
+        <div class="desc">Bounded cost and carbon assumption controls for stress-testing selected CFS framing configurations and regenerating the dashboard front under modified assumptions.</div>
+        <div class="warning-strong">
+          Scenario controls recalculate selected cost and carbon assumptions inside the dashboard response model.
+          The embedded scenario front is regenerated from the browser-based grid surrogate only.
+          It does not re-run NSGA-II, replace the imported Python Pareto front, or represent a new full optimisation run.
+        </div> 
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title">Cost scenario assumptions</div>
+          <div class="panel-desc">These controls directly update the dashboard response model when Apply scenario is pressed.</div>
+
+          <div class="scenario-field">
+            <label for="sc-steel-cost">Steel material cost <span>NZD/kg</span></label>
+            <input class="scenario-input" id="sc-steel-cost" type="number" step="0.01" min="0" />
+          </div>
+
+          <div class="scenario-field">
+            <label for="sc-factory-cost">Factory processing cost <span>NZD/kg</span></label>
+            <input class="scenario-input" id="sc-factory-cost" type="number" step="0.01" min="0" />
+          </div>
+
+          <div class="scenario-field">
+            <label for="sc-labour-rate">Site labour rate <span>NZD/h</span></label>
+            <input class="scenario-input" id="sc-labour-rate" type="number" step="0.50" min="0" />
+          </div>
+
+          <div class="scenario-field">
+            <label for="sc-transport-distance">Transport distance <span>km</span></label>
+            <input class="scenario-input" id="sc-transport-distance" type="number" step="1" min="0" />
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Carbon factor assumptions</div>
+          <div class="panel-desc">These controls affect A1–A3 steel carbon, A4 freight carbon, and A5 installation carbon.</div>
+
+          <div class="scenario-field">
+            <label for="sc-freight-carbon">Freight carbon factor <span>kgCO₂e/tonne-km</span></label>
+            <input class="scenario-input" id="sc-freight-carbon" type="number" step="0.001" min="0" />
+          </div>
+
+          <div class="scenario-field">
+            <label for="sc-steel-carbon">A1–A3 steel carbon factor <span>kgCO₂e/kg</span></label>
+            <input class="scenario-input" id="sc-steel-carbon" type="number" step="0.01" min="0" />
+          </div>
+
+          <div class="scenario-field">
+            <label for="sc-a5-carbon">A5 installation carbon factor <span>kgCO₂e/m²</span></label>
+            <input class="scenario-input" id="sc-a5-carbon" type="number" step="0.01" min="0" />
+          </div>
+
+          <div class="button-row">
+            <button class="btn" onclick="applyScenarioAssumptions()">Apply scenario</button>
+            <button class="btn" onclick="resetScenarioAssumptions()">Reset to thesis baseline</button>
+            <button class="btn" onclick="exportScenarioMemo()">Export scenario memo</button>
+            <button class="btn" onclick="regenerateEmbeddedPareto()">Regenerate embedded Pareto</button>
+          </div>
+          <div class="run-status" id="scenario-status">Scenario controls are loaded from the current dashboard baseline.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Original vs scenario vs S2 comparison</div>
+        <div class="panel-desc">The selected design is the current Design Explorer vector. Original values use the saved baseline assumptions; scenario values use the current assumption controls.</div>
+        <div class="table-wrap"><table class="tbl" id="scenario-comparison-table"></table></div>
+      </div>
+
+      <div class="header" style="margin-top:24px">
+        <div class="title" style="font-size:20px">Prefabrication scenario diagnostic</div>
+        <div class="desc">S1 low-prefabrication, S2 medium-prefabrication reference, and S3 high-prefabrication at R_p = 0, R_t = 0.</div>
+      </div>
+      <div class="grid-3" id="scenario-cards"></div>
+      <div class="grid-2"><div class="panel"><div class="panel-title">Absolute scenario values</div><div class="chart"><canvas id="scenario-abs"></canvas></div></div><div class="panel"><div class="panel-title">% change vs S2</div><div class="chart"><canvas id="scenario-delta"></canvas></div></div></div>
+      <div class="panel"><div class="panel-title">Opening/detailing complexity × prefabrication interaction</div><div class="panel-desc">Normalised cost response at R_p = 0, R_t = 0 for different OC levels.</div><div class="chart"><canvas id="oc-interaction"></canvas></div></div>
+    </section>
+
+    <section id="page-sensitivity" class="page">
+      <div class="header"><div class="title">Sensitivity & Robustness</div><div class="desc">Combines the embedded one-at-a-time diagnostic with imported sensitivity and Monte Carlo robustness outputs. Use imported result tables for project decisions; use the embedded diagnostic only as an explanatory interaction layer.</div></div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-title">OAT sensitivity</div><div class="panel-desc">Objective change from each variable's low to high bound, relative to S2.</div><div class="chart tall"><canvas id="sens-chart"></canvas></div></div>
+        <div class="panel"><div class="panel-title">Imported global sensitivity</div><div class="panel-desc">Reads <code>lhs_prcc_sensitivity_*.csv</code>, <code>lhs_spearman_sensitivity_*.csv</code>, or the sensitivity array inside <code>dashboard_config.json</code>.</div><div class="chart tall"><canvas id="imported-sens-chart"></canvas></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-title">Sensitivity table</div><div class="table-wrap"><table class="tbl" id="sens-table"></table></div></div>
+        <div class="panel"><div class="panel-title">Imported Monte Carlo robustness</div><div class="panel-desc">Shows P5/P50/P95 uncertainty and paired-S2 probabilities where exported by the Python model.</div><div class="table-wrap"><table class="tbl" id="mc-table"></table></div></div>
+      </div>
+    </section>
+
+    <section id="page-decision" class="page">
+      <div class="header"><div class="title">Decision Ranking</div><div class="desc">Stakeholder-weighted TOPSIS ranking. All objectives are minimised.</div><div class="scope">TOPSIS is a translation layer from Pareto alternatives to stakeholder recommendations; it is not proof of a universal optimum.</div></div>
+      <div class="grid-2"><div class="panel"><div class="panel-title">Objective weights</div><div class="panel-desc">Weights are normalised automatically. The ranking is a stakeholder filter on nondominated solutions, not a universal optimum.</div><div class="slider-group"><div class="slider-head"><span class="slider-label">Cost weight</span><span class="slider-value" id="w-cost-val">0.50</span></div><input class="rp" type="range" min="0" max="100" value="50" id="w-cost" oninput="updateDecision()"></div><div class="slider-group"><div class="slider-head"><span class="slider-label">Carbon weight</span><span class="slider-value" id="w-carbon-val">0.25</span></div><input class="pf" type="range" min="0" max="100" value="25" id="w-carbon" oninput="updateDecision()"></div><div class="slider-group"><div class="slider-head"><span class="slider-label">Time weight</span><span class="slider-value" id="w-time-val">0.25</span></div><input class="oc" type="range" min="0" max="100" value="25" id="w-time" oninput="updateDecision()"></div><div class="slider-group"><div class="slider-head"><span class="slider-label">Robustness penalty</span><span class="slider-value" id="w-robust-val">0.20</span></div><input class="pf" type="range" min="0" max="100" value="20" id="w-robust" oninput="updateDecision()"><div class="hint">Uses imported Monte Carlo robust score / paired-S2 probabilities when available.</div></div></div><div class="panel"><div class="panel-title">Stakeholder recommendation</div><div id="decision-box" class="decision-box">Load or generate Pareto alternatives to rank.</div></div></div>
+      <div class="grid-2"><div class="panel"><div class="panel-title">Ranking table</div><div class="table-wrap"><table class="tbl" id="ranking-table"></table></div></div><div class="panel"><div class="panel-title">Robustness-adjusted interpretation</div><div id="robust-decision-box" class="decision-box">Monte Carlo output not loaded yet.</div><div class="button-row"><button class="btn" onclick="exportPractitionerMemo()">Export decision memo</button></div></div></div>
+    </section>
+
+
+    <section id="page-audit" class="page">
+      <div class="header">
+        <div class="title">Model & Data Audit</div>
+        <div class="desc">Technical traceability panel. This page separates model boundary, imported optimisation outputs, uncertainty evidence, and practitioner interpretation.</div>
+        <div class="scope">This page documents that the dashboard is an interpretation layer for exported optimisation outputs, not a separate optimisation engine.</div>
+      </div>
+      <div class="grid-3">
+        <div class="panel"><div class="panel-title">Model boundary</div><div id="audit-scope" class="decision-box"></div></div>
+        <div class="panel"><div class="panel-title">Output status</div><div id="audit-files" class="decision-box"></div></div>
+        <div class="panel"><div class="panel-title">Decision-vector traceability</div><div id="audit-vector" class="decision-box"></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-title">Validation / uncertainty ranges</div><div class="panel-desc">Loaded from <code>validation_ranges</code> inside <code>dashboard_config.json</code>.</div><div class="table-wrap"><table class="tbl" id="validation-table"></table></div></div>
+        <div class="panel"><div class="panel-title">Practitioner interpretation memo</div><div id="memo-box" class="decision-box"></div></div>
+      </div>
+      <div class="panel"><div class="panel-title">Dashboard role statement</div><div id="dashboard-statement" class="notice"></div></div>
+    </section>
+
+    <section id="page-data" class="page">
+      <div class="header"><div class="title">Data Import / Export</div><div class="desc">Use this page to connect the dashboard to your Python NSGA-II output. The preferred input is <code>dashboard/data/dashboard_config.json</code>; CSV bundle import is provided for separate result tables.</div></div>
+      <div class="grid-2">
+        <div class="panel"><div class="panel-title">Import Python dashboard_config.json</div><div class="panel-desc">Generated by <code>export_dashboard_config()</code> in the current Python script. This is the preferred dashboard data source.</div><label class="file-label" for="json-file">Import JSON</label><input id="json-file" type="file" accept=".json,application/json" style="display:none" onchange="importConfig(event)"><button class="btn" onclick="resetAll()" style="margin-left:10px">Reset embedded data</button><div class="notice" id="import-status">No external JSON imported. The dashboard is using the embedded current Python-equation surrogate.</div></div>
+        <div class="panel"><div class="panel-title">Import separate CSV result tables</div><div class="panel-desc">Optional fallback for <code>pareto_front_*.csv</code>, <code>representative_solutions_*.csv</code>, <code>monte_carlo_robustness_*.csv</code>, <code>lhs_prcc_sensitivity_*.csv</code>, <code>topsis_stakeholder_ranking_*.csv</code>, and validation notes.</div><label class="file-label" for="csv-files">Import CSV bundle</label><input id="csv-files" type="file" accept=".csv,text/csv" multiple style="display:none" onchange="importCSVBundle(event)"><div class="notice" id="csv-status">No CSV bundle imported yet.</div></div>
+      </div>
+      <div class="grid-2"><div class="panel"><div class="panel-title">Current S2 and model check</div><div id="model-check" class="decision-box"></div></div><div class="panel"><div class="panel-title">Dashboard key findings</div><div class="table-wrap"><table class="tbl" id="key-table"></table></div></div></div>
+    </section>
+  </main>
+</div>
+
+<script>
+// ============================================================================
+// CFS RESPONSE MODEL — aligned with current Python code
+// Design vector: x = [R_p, R_t, OC, P_f]
+// ============================================================================
+function deepClone(obj){ return JSON.parse(JSON.stringify(obj)); }
+function clamp(v, lo, hi){ return Math.min(Math.max(Number(v), lo), hi); }
+function sumValues(obj){ return Object.values(obj).reduce((a,b)=>a+Number(b),0); }
+function fmt0(v){ return Number(v).toLocaleString(undefined,{maximumFractionDigits:0}); }
+function fmt1(v){ return Number(v).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1}); }
+function fmt2(v){ return Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function pct(v, ref){ return (Number(v)/Number(ref)-1)*100; }
+function pctText(v){ return (v>=0?'+':'') + v.toFixed(1) + '%'; }
+
+const DEFAULT_B = {
+  // Geometry and quantities
+  footprint_area_m2: 98.292,
+  envelope_area_m2: 217.2555,
+  num_wall_panels: 48,
+  num_roof_trusses: 58,
+  W_base: 2195.264,
+
+  // S2 process-time references
+  T_factory_truss_base: 24.20,
+  T_factory_panel_base: 11.70,
+  T_factory_setup_base: 3.50,
+  T_delivery_logistics_base: 2.00,
+  T_site_mobilisation_base: 3.00,
+  T_installation_truss_base: 18.18,
+  T_installation_panel_base: 57.06,
+
+  // Cost rates
+  raw_steel_material_nzd_per_kg: 2.40,
+  factory_processing_nzd_per_kg: 2.80,
+  site_labor_rate_nzd_per_hr: 48.0,
+  C_setup_per_panel_type: 25.0,
+  C_setup_per_truss_type: 35.0,
+  C_jig_base: 800.0,
+  transport_cost_nzd_per_tonne_km: 3.00,
+  lifting_equipment_cost_nzd: 0.0,
+  steel_waste_rate_ref: 0.05,
+  steel_waste_disposal_nzd_per_tonne: 250.0,
+  overhead_fraction_ref: 0.10,
+
+  // Carbon factors
+  steel_carbon_factor_a1_a3_kgco2e_per_kg: 2.10,
+  a4_default_transport_distance_km: 121.0,
+  freight_kgco2e_per_tonne_km: 0.135,
+  a5_installation_carbon_kgco2e_per_m2: 3.20,
+  nz_grid_kgco2e_per_kwh: 0.08,
+  factory_average_power_kw: 5.0,
+  site_average_power_kw: 2.0,
+  include_factory_energy_carbon: true,
+  include_site_energy_carbon_separately: false,
+  include_waste_carbon: true,
+
+  // Optimiser variable ranges
+  P_f_range: [0.50, 0.90],
+  R_p_range: [0.0, 1.0],
+  R_t_range: [0.0, 1.0],
+  opening_complexity_range: [0.80, 1.30],
+  opening_complexity_ref: 1.00,
+  x_ref: [0.0, 0.0, 1.00, 0.72],
+
+  // Reporting categories only
+  baseline_panel_class_count: 4,
+  baseline_truss_type_count: 17,
+  panel_width_schemes: {
+    0: [600,900,1200,1500,1800,2100],
+    1: [900,1200,1500,1800],
+    2: [1200,1500,1800],
+    3: [1200,1800]
+  },
+  truss_span_schemes: {
+    0: [3.0,3.3,3.6,3.9,4.2,4.5,4.8,5.1,5.4,5.7,6.0,6.3,6.6,6.9,7.2,7.5,7.8],
+    1: [3.0,3.3,3.6,3.9,4.2,4.5,5.1,5.4,5.7,6.0,6.3,6.6,6.9,7.2,7.5,7.8],
+    2: [3.0,3.6,4.2,4.5,4.8,5.1,5.4,6.0,6.3,6.6,6.9,7.2,7.5,7.8]
+  },
+
+  // Current tuned balanced response coefficients from the uploaded Python code
+  k_prefab_time_saving: 0.620,
+  k_prefab_waste_reduction: 0.150,
+  k_prefab_a5_carbon_saving: 0.35,
+
+  k_logistics_cost: 0.110,
+  k_logistics_time: 0.150,
+  k_logistics_carbon: 0.040,
+
+  k_opening_cost: 0.160,
+  k_opening_carbon: 0.090,
+  k_opening_time: 0.160,
+  lambda_opening_prefab_reduction: 0.45,
+
+  R_p_knee: 0.65,
+  R_t_knee: 0.65,
+
+  k_Rp_setup_saving: 0.22,
+  k_Rp_site_saving: 0.030,
+  k_Rp_waste_saving: 0.012,
+  k_Rp_factory_penalty: 0.050,
+  k_Rp_logistics_penalty: 0.050,
+  k_Rp_oversize_penalty: 0.160,
+
+  k_Rt_setup_saving: 0.12,
+  k_Rt_site_saving: 0.020,
+  k_Rt_waste_saving: 0.007,
+  k_Rt_factory_penalty: 0.030,
+  k_Rt_logistics_penalty: 0.040,
+  k_Rt_oversize_penalty: 0.120,
+
+  k_OC_low_design_cost: 0.030,
+  k_OC_low_factory_time: 0.030,
+  k_OC_low_material_penalty: 0.020,
+
+  k_OC_high_cost: 0.220,
+  k_OC_high_time: 0.280,
+  k_OC_high_carbon: 0.120,
+  k_OC_high_material_penalty: 0.060,
+
+  k_prefab_factory_time_increase: 0.28,
+  k_prefab_site_time_saving: 0.60,
+  k_prefab_factory_cost_increase: 0.20,
+
+  P_f_factory_saturation: 0.78,
+  T_site_minimum_hrs: 28.0,
+  k_prefab_overload_cost: 0.42,
+  k_prefab_overload_time: 0.30,
+  k_prefab_overload_carbon: 0.08,
+
+  // Screening constraints
+  max_panel_width_m: 2.40,
+  max_panel_height_m: 3.00,
+  assumed_panel_height_m: 2.70,
+  assumed_stud_spacing_mm: 600.0,
+  assumed_steel_thickness_mm: 0.75,
+  min_steel_thickness_mm: 0.55,
+  max_lift_mass_kg: 2000.0,
+  wall_steel_weight_fraction: 0.60,
+  min_factory_repetition_score: 0.65,
+  max_OCI_soft: 1.20,
+  waikato_weather_downtime_fraction: 0.10,
+  weather_shielding_factor: 0.60
+};
+
+let B = deepClone(DEFAULT_B);
+let state = { R_p: 0.0, R_t: 0.0, OC: 1.00, P_f: 0.72 };
+let charts = {};
+let importedPareto = null;
+let importedRepresentatives = null;
+let importedMonteCarlo = null;
+let importedTopsis = null;
+let importedSensitivity = null;
+let importedValidationRanges = null;
+let importedScope = null;
+let importedProject = null;
+let importedValidationNotes = null;
+let importedHypervolume = null;
+let importedComponentBreakdowns = {};
+let importedKeyFindings = null;
+let usingImported = false;
+let currentTab = 'p2d';
+
+// Scenario / recalibration state
+let baselineScenarioAssumptions = null;
+let scenarioApplied = false;
+let forceScenarioEmbeddedFront = false;
+
+// Recompute base S2 support quantities and then synchronise the dashboard
+// baseline with the same raw objective functions used by the Python model.
+function recomputeReferences(){
+  B.T_factory_production_base = B.T_factory_truss_base + B.T_factory_panel_base;
+  B.T_factory_base = B.T_factory_production_base;
+  B.T_installation_base = B.T_installation_truss_base + B.T_installation_panel_base;
+
+  B.delivery_logistics_rate_nzd_per_hr = B.site_labor_rate_nzd_per_hr;
+  B.site_mobilisation_rate_nzd_per_hr = B.site_labor_rate_nzd_per_hr;
+
+  B.Time_S2_reference = (
+    B.T_factory_production_base +
+    B.T_factory_setup_base +
+    B.T_delivery_logistics_base +
+    B.T_installation_base +
+    B.T_site_mobilisation_base
+  );
+
+  const x = B.x_ref;
+  const P_norm_ref = (x[3] - B.P_f_range[0]) / (B.P_f_range[1] - B.P_f_range[0]);
+  const factory_processing_multiplier_ref = 1.0 + 0.45 * P_norm_ref;
+
+  B.C_ref_steel_material = B.W_base * B.raw_steel_material_nzd_per_kg;
+  B.C_ref_factory_processing = B.W_base * B.factory_processing_nzd_per_kg * factory_processing_multiplier_ref;
+  B.C_ref_site_installation_labour = B.T_installation_base * B.site_labor_rate_nzd_per_hr;
+  B.C_ref_factory_setup = B.baseline_panel_class_count * B.C_setup_per_panel_type + B.baseline_truss_type_count * B.C_setup_per_truss_type + B.C_jig_base;
+  B.C_ref_transport = (B.W_base / 1000.0) * B.a4_default_transport_distance_km * B.transport_cost_nzd_per_tonne_km;
+  B.C_ref_delivery_logistics = B.T_delivery_logistics_base * B.delivery_logistics_rate_nzd_per_hr;
+  B.C_ref_site_mobilisation = B.T_site_mobilisation_base * B.site_mobilisation_rate_nzd_per_hr;
+  B.C_ref_waste_handling = (B.W_base * B.steel_waste_rate_ref / 1000.0) * B.steel_waste_disposal_nzd_per_tonne;
+  B.C_ref_lifting_equipment = B.lifting_equipment_cost_nzd;
+
+  B.C_ref_direct_subtotal = (
+    B.C_ref_steel_material +
+    B.C_ref_factory_processing +
+    B.C_ref_site_installation_labour +
+    B.C_ref_factory_setup +
+    B.C_ref_transport +
+    B.C_ref_delivery_logistics +
+    B.C_ref_site_mobilisation +
+    B.C_ref_waste_handling +
+    B.C_ref_lifting_equipment
+  );
+
+  B.C_ref_overhead = B.overhead_fraction_ref * B.C_ref_direct_subtotal;
+  B.C_S2_reference = B.C_ref_direct_subtotal + B.C_ref_overhead;
+
+  B.a4_transport_carbon_kgco2e_per_kg = B.freight_kgco2e_per_tonne_km * B.a4_default_transport_distance_km / 1000.0;
+
+  B.CO2_ref_A1_A3_steel = B.W_base * B.steel_carbon_factor_a1_a3_kgco2e_per_kg;
+  B.CO2_ref_A4_transport = (B.W_base / 1000.0) * B.a4_default_transport_distance_km * B.freight_kgco2e_per_tonne_km;
+  B.CO2_ref_factory_energy = B.include_factory_energy_carbon ? B.T_factory_production_base * B.factory_average_power_kw * B.nz_grid_kgco2e_per_kwh : 0.0;
+  B.CO2_ref_site_energy = B.include_site_energy_carbon_separately ? B.T_installation_base * B.site_average_power_kw * B.nz_grid_kgco2e_per_kwh : 0.0;
+  B.CO2_ref_A5_installation = B.envelope_area_m2 * B.a5_installation_carbon_kgco2e_per_m2;
+  B.CO2_ref_waste = B.include_waste_carbon ? B.W_base * B.steel_waste_rate_ref * B.steel_carbon_factor_a1_a3_kgco2e_per_kg : 0.0;
+
+  B.CO2_S2_reference = (
+    B.CO2_ref_A1_A3_steel +
+    B.CO2_ref_A4_transport +
+    B.CO2_ref_factory_energy +
+    B.CO2_ref_site_energy +
+    B.CO2_ref_A5_installation +
+    B.CO2_ref_waste
+  );
+
+  // Official plotting references are the raw objective values at x_ref,
+  // matching CFSObjectiveFunctions._ensure_refs() in Python.
+  const xref = B.x_ref.slice();
+  B.C_S2_reference = totalCostRaw(xref);
+  B.CO2_S2_reference = totalCarbonRaw(xref);
+  B.Time_S2_reference = totalTimeRaw(xref);
+}
+
+function decodeX(x){
+  return [
+    clamp(x[0], B.R_p_range[0], B.R_p_range[1]),
+    clamp(x[1], B.R_t_range[0], B.R_t_range[1]),
+    clamp(x[2], B.opening_complexity_range[0], B.opening_complexity_range[1]),
+    clamp(x[3], B.P_f_range[0], B.P_f_range[1])
+  ];
+}
+
+function Pnorm(P_f){
+  return (P_f - B.P_f_range[0]) / (B.P_f_range[1] - B.P_f_range[0]);
+}
+
+function prefabBenefitFromPnorm(p){
+  return (1.0 - Math.exp(-2.30 * p)) / (1.0 - Math.exp(-2.30));
+}
+
+function panelSchemeFromRp(R_p){
+  R_p = clamp(R_p, B.R_p_range[0], B.R_p_range[1]);
+  if(R_p < 0.20) return 0;
+  if(R_p < 0.45) return 1;
+  if(R_p < 0.75) return 2;
+  return 3;
+}
+
+function trussSchemeFromRt(R_t){
+  R_t = clamp(R_t, B.R_t_range[0], B.R_t_range[1]);
+  if(R_t < 0.20) return 0;
+  if(R_t < 0.65) return 1;
+  return 2;
+}
+
+function nPanelClasses(R_p){ return 4.0 - 2.0 * clamp(R_p, B.R_p_range[0], B.R_p_range[1]); }
+function nTrussTypes(R_t){ return 17.0 - 3.0 * clamp(R_t, B.R_t_range[0], B.R_t_range[1]); }
+
+function riPanel(R_p){
+  return (B.num_wall_panels / nPanelClasses(R_p)) / (B.num_wall_panels / B.baseline_panel_class_count);
+}
+
+function riTruss(R_t){
+  return (B.num_roof_trusses / nTrussTypes(R_t)) / (B.num_roof_trusses / B.baseline_truss_type_count);
+}
+
+function engineeringState(x){
+  const [R_p, R_t, OC, P_f] = decodeX(x);
+
+  const P_norm = Pnorm(P_f);
+  const P_norm_ref = Pnorm(B.x_ref[3]);
+
+  const prefab_benefit = prefabBenefitFromPnorm(P_norm);
+  const prefab_benefit_ref = prefabBenefitFromPnorm(P_norm_ref);
+
+  let prefab_overload = Math.max(0.0, P_f - B.P_f_factory_saturation);
+  prefab_overload = prefab_overload / (B.P_f_range[1] - B.P_f_factory_saturation);
+  prefab_overload = prefab_overload * prefab_overload;
+
+  const panel_pen = Math.pow(Math.max(0.0, R_p - B.R_p_knee), 2);
+  const truss_pen = Math.pow(Math.max(0.0, R_t - B.R_t_knee), 2);
+
+  const N_panel_classes = nPanelClasses(R_p);
+  const N_truss_types = nTrussTypes(R_t);
+
+  const RI_panel = riPanel(R_p);
+  const RI_truss = riTruss(R_t);
+
+  const OC_low = Math.max(0.0, 1.0 - OC);
+  const OC_high = Math.max(0.0, OC - 1.0);
+  const OC_low_penalty = OC_low * OC_low;
+  const OC_high_penalty = OC_high + OC_high * OC_high;
+
+  const logistics = P_norm * P_norm * (
+    0.65 +
+    B.k_Rp_logistics_penalty * R_p +
+    B.k_Rt_logistics_penalty * R_t
+  );
+
+  return {
+    R_p, R_t, OC, P_f,
+    P_norm, P_norm_ref, dP_norm: P_norm - P_norm_ref,
+    prefab_benefit, prefab_benefit_ref, d_prefab_benefit: prefab_benefit - prefab_benefit_ref,
+    prefab_overload,
+    panel_pen, truss_pen,
+    N_panel_classes, N_truss_types,
+    RI_panel, RI_truss,
+    panel_rat: Math.max(0.0, RI_panel - 1.0),
+    truss_rat: Math.max(0.0, RI_truss - 1.0),
+    OC_low, OC_high, OC_low_penalty, OC_high_penalty,
+    logistics,
+    panel_scheme: panelSchemeFromRp(R_p),
+    truss_scheme: trussSchemeFromRt(R_t)
+  };
+}
+
+function materialWeightRaw(x){
+  const s = engineeringState(x);
+
+  const repetition_saving =
+    B.k_Rp_waste_saving * s.R_p +
+    B.k_Rt_waste_saving * s.R_t;
+
+  const prefab_precision_saving = 0.012 * Math.max(0.0, s.dP_norm);
+
+  const rationalisation_oversizing =
+    B.k_Rp_oversize_penalty * s.panel_pen +
+    B.k_Rt_oversize_penalty * s.truss_pen;
+
+  const opening_mass_effect =
+    B.k_OC_low_material_penalty * s.OC_low +
+    B.k_OC_high_material_penalty * s.OC_high_penalty;
+
+  const W = B.W_base * (
+    1.0 -
+    repetition_saving -
+    prefab_precision_saving +
+    rationalisation_oversizing +
+    opening_mass_effect
+  );
+
+  return clamp(W, B.W_base * 0.94, B.W_base * 1.06);
+}
+
+function timeComponentsRaw(x){
+  const s = engineeringState(x);
+
+  const T_factory_production = B.T_factory_production_base * (
+    1.0 +
+    B.k_prefab_factory_time_increase * s.P_norm -
+    0.020 * s.R_p -
+    0.010 * s.R_t +
+    B.k_Rp_factory_penalty * s.panel_pen +
+    B.k_Rt_factory_penalty * s.truss_pen +
+    B.k_OC_low_factory_time * s.OC_low +
+    0.120 * s.OC_high_penalty +
+    B.k_prefab_overload_time * s.prefab_overload
+  );
+
+  let T_factory_setup = B.T_factory_setup_base * (
+    1.0 -
+    0.22 * s.R_p -
+    0.12 * s.R_t +
+    0.45 * s.panel_pen +
+    0.35 * s.truss_pen
+  );
+  T_factory_setup = Math.max(0.40 * B.T_factory_setup_base, T_factory_setup);
+
+  let T_site_installation = B.T_installation_base * (
+    1.0 -
+    B.k_prefab_site_time_saving * s.prefab_benefit -
+    B.k_Rp_site_saving * s.R_p -
+    B.k_Rt_site_saving * s.R_t +
+    0.18 * s.panel_pen +
+    0.14 * s.truss_pen -
+    0.08 * s.OC_low +
+    B.k_OC_high_time * s.OC_high_penalty +
+    B.k_logistics_time * s.logistics
+  );
+  T_site_installation = Math.max(B.T_site_minimum_hrs, T_site_installation);
+
+  const T_delivery_logistics = B.T_delivery_logistics_base * (
+    1.0 +
+    B.k_logistics_time * s.logistics +
+    0.03 * s.R_p +
+    0.02 * s.R_t
+  );
+
+  const T_site_mobilisation = B.T_site_mobilisation_base;
+
+  const T_weather =
+    B.waikato_weather_downtime_fraction *
+    B.weather_shielding_factor *
+    T_site_installation;
+
+  return {
+    T_factory_production,
+    T_factory_setup,
+    T_delivery_logistics,
+    T_site_mobilisation,
+    T_site_installation,
+    T_weather
+  };
+}
+
+function totalTimeRaw(x){ return sumValues(timeComponentsRaw(x)); }
+
+function costComponentsRaw(x){
+  const s = engineeringState(x);
+  const W = materialWeightRaw(x);
+
+  const C_steel = W * B.raw_steel_material_nzd_per_kg;
+
+  const factory_processing_multiplier = (
+    1.0 +
+    B.k_prefab_factory_cost_increase * s.P_norm +
+    B.k_Rp_factory_penalty * s.R_p +
+    B.k_Rt_factory_penalty * s.R_t +
+    B.k_prefab_overload_cost * s.prefab_overload +
+    B.k_OC_low_design_cost * s.OC_low_penalty +
+    B.k_OC_high_cost * s.OC_high_penalty
+  );
+
+  const C_factory_processing =
+    W * B.factory_processing_nzd_per_kg * factory_processing_multiplier;
+
+  const C_setup_base =
+    B.baseline_panel_class_count * B.C_setup_per_panel_type +
+    B.baseline_truss_type_count * B.C_setup_per_truss_type +
+    B.C_jig_base;
+
+  const setup_saving =
+    B.k_Rp_setup_saving * s.R_p +
+    B.k_Rt_setup_saving * s.R_t;
+
+  const setup_penalty =
+    0.40 * s.panel_pen +
+    0.30 * s.truss_pen;
+
+  const C_setup = C_setup_base * Math.max(0.45, 1.0 - setup_saving + setup_penalty);
+
+  const T_components = timeComponentsRaw(x);
+
+  const C_site_labour =
+    T_components.T_site_installation * B.site_labor_rate_nzd_per_hr;
+
+  const C_transport =
+    (W / 1000.0) *
+    B.a4_default_transport_distance_km *
+    B.transport_cost_nzd_per_tonne_km *
+    (1.0 + 0.06 * s.P_norm + 0.025 * s.R_p + 0.020 * s.R_t);
+
+  const C_delivery_logistics =
+    B.T_delivery_logistics_base *
+    B.delivery_logistics_rate_nzd_per_hr *
+    (1.0 + B.k_logistics_cost * s.logistics);
+
+  const C_site_mobilisation =
+    B.T_site_mobilisation_base *
+    B.site_mobilisation_rate_nzd_per_hr;
+
+  const C_opening_standardisation =
+    B.C_ref_direct_subtotal *
+    B.k_OC_low_design_cost *
+    s.OC_low;
+
+  const C_opening_complexity =
+    B.C_ref_direct_subtotal *
+    B.k_OC_high_cost *
+    s.OC_high_penalty;
+
+  const C_waste_handling =
+    (W * B.steel_waste_rate_ref / 1000.0) *
+    B.steel_waste_disposal_nzd_per_tonne;
+
+  const direct =
+    C_steel +
+    C_factory_processing +
+    C_setup +
+    C_site_labour +
+    C_transport +
+    C_delivery_logistics +
+    C_site_mobilisation +
+    C_opening_standardisation +
+    C_opening_complexity +
+    C_waste_handling +
+    B.lifting_equipment_cost_nzd;
+
+  const C_overhead = B.overhead_fraction_ref * direct;
+
+  return {
+    C_steel,
+    C_factory_processing,
+    C_setup,
+    C_site_labour,
+    C_transport,
+    C_delivery_logistics,
+    C_site_mobilisation,
+    C_opening_standardisation,
+    C_opening_complexity,
+    C_waste_handling,
+    C_overhead
+  };
+}
+
+function totalCostRaw(x){ return sumValues(costComponentsRaw(x)); }
+
+function carbonComponentsRaw(x){
+  const s = engineeringState(x);
+  const W = materialWeightRaw(x);
+
+  const CO2_A1_A3_steel =
+    W * B.steel_carbon_factor_a1_a3_kgco2e_per_kg;
+
+  let waste_factor =
+    B.steel_waste_rate_ref *
+    (
+      1.0 -
+      B.k_Rp_waste_saving * s.R_p -
+      B.k_Rt_waste_saving * s.R_t -
+      B.k_prefab_waste_reduction * s.prefab_benefit +
+      0.04 * s.OC_high_penalty
+    );
+
+  waste_factor = clamp(waste_factor, 0.015, 0.080);
+
+  const CO2_waste = B.include_waste_carbon ?
+    W * waste_factor * B.steel_carbon_factor_a1_a3_kgco2e_per_kg :
+    0.0;
+
+  const CO2_A4_transport =
+    (W / 1000.0) *
+    B.a4_default_transport_distance_km *
+    B.freight_kgco2e_per_tonne_km *
+    (
+      1.0 +
+      B.k_logistics_carbon * s.logistics +
+      0.025 * s.R_p +
+      0.020 * s.R_t
+    );
+
+  const T_comp = timeComponentsRaw(x);
+
+  const CO2_factory_energy = B.include_factory_energy_carbon ?
+    T_comp.T_factory_production * B.factory_average_power_kw * B.nz_grid_kgco2e_per_kwh :
+    0.0;
+
+  let CO2_A5_installation =
+    B.envelope_area_m2 *
+    B.a5_installation_carbon_kgco2e_per_m2 *
+    (
+      1.0 -
+      B.k_prefab_a5_carbon_saving * s.prefab_benefit +
+      B.k_OC_high_carbon * s.OC_high_penalty +
+      0.015 * s.OC_low
+    );
+
+  CO2_A5_installation = Math.max(
+    0.35 * B.envelope_area_m2 * B.a5_installation_carbon_kgco2e_per_m2,
+    CO2_A5_installation
+  );
+
+  return {
+    CO2_A1_A3_steel,
+    CO2_waste,
+    CO2_A4_transport,
+    CO2_factory_energy,
+    CO2_A5_installation
+  };
+}
+
+function totalCarbonRaw(x){ return sumValues(carbonComponentsRaw(x)); }
+
+// Aliases used by the existing dashboard UI
+function materialWeight(x){ return materialWeightRaw(x); }
+function timeComponents(x){ return timeComponentsRaw(x); }
+function totalTime(x){ return totalTimeRaw(x); }
+function costComponents(x){ return costComponentsRaw(x); }
+function totalCost(x){ return totalCostRaw(x); }
+function carbonComponents(x){ return carbonComponentsRaw(x); }
+function totalCarbon(x){ return totalCarbonRaw(x); }
+
+function currentX(){ return [state.R_p, state.R_t, state.OC, state.P_f]; }
+function s2X(){ return B.x_ref.slice(); }
+
+function objectiveRecord(x){
+  x = decodeX(x);
+  const C = totalCostRaw(x);
+  const E = totalCarbonRaw(x);
+  const T = totalTimeRaw(x);
+  const s = engineeringState(x);
+  return {
+    R_p: x[0],
+    R_t: x[1],
+    OC: x[2],
+    P_f: x[3],
+    panel_scheme: s.panel_scheme,
+    truss_scheme: s.truss_scheme,
+    N_panel_classes: s.N_panel_classes,
+    N_truss_types: s.N_truss_types,
+    Weight_kg: materialWeightRaw(x),
+    Cost_NZD: C,
+    Carbon_kgCO2e: E,
+    Time_hours: T,
+    Cost_normalized: C / B.C_S2_reference,
+    Carbon_normalized: E / B.CO2_S2_reference,
+    Time_normalized: T / B.Time_S2_reference,
+    Cost_vs_S2: pct(C, B.C_S2_reference),
+    Carbon_vs_S2: pct(E, B.CO2_S2_reference),
+    Time_vs_S2: pct(T, B.Time_S2_reference)
+  };
+}
+
+function nzConstraintReport(x){
+  const s = engineeringState(x);
+  const W = materialWeightRaw(x);
+  const ps = s.panel_scheme;
+  const widths = B.panel_width_schemes[ps];
+  const maxWidth = Math.max(...widths) / 1000.0;
+  const avgWidth = widths.reduce((a,b)=>a+b,0) / widths.length / 1000.0;
+
+  const wallSteel = W * B.wall_steel_weight_fraction;
+  const avgPanelMass = wallSteel / B.num_wall_panels;
+  const panelLift = avgPanelMass * (maxWidth / Math.max(avgWidth, 1e-9));
+
+  const panelRep = 1.0 - (s.N_panel_classes - 1.0) / Math.max(B.num_wall_panels - 1.0, 1.0);
+  const trussRep = 1.0 - (s.N_truss_types - 1.0) / Math.max(B.num_roof_trusses - 1.0, 1.0);
+  const factoryRep = Math.min(panelRep, trussRep);
+
+  const hardOK =
+    maxWidth <= B.max_panel_width_m &&
+    B.assumed_panel_height_m <= B.max_panel_height_m &&
+    B.assumed_stud_spacing_mm <= 600.0 &&
+    B.assumed_steel_thickness_mm >= B.min_steel_thickness_mm &&
+    panelLift <= B.max_lift_mass_kg;
+
+  return {
+    max_panel_width_m: maxWidth,
+    panel_height_m: B.assumed_panel_height_m,
+    stud_spacing_mm: B.assumed_stud_spacing_mm,
+    steel_thickness_mm: B.assumed_steel_thickness_mm,
+    panel_lift_mass_kg: panelLift,
+    factory_repetition_score: factoryRep,
+    opening_complexity_index: s.OC,
+    unique_truss_spans: s.N_truss_types,
+    NZ_feasible: hardOK,
+    soft_warnings: [
+      factoryRep < B.min_factory_repetition_score ? 'factory repetition below preferred threshold' : null,
+      s.OC > B.max_OCI_soft ? 'OC above preferred soft limit' : null
+    ].filter(Boolean)
+  };
+}
+
+
+// ============================================================================
+// Pareto fallback, import mapping and ranking
+// ============================================================================
+function safeNumber(value, fallback = NaN) {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : fallback;
+  }
+
+  const cleaned = String(value)
+    .trim()
+    .replace(/,/g, "")
+    .replace(/\$/g, "")
+    .replace(/NZD/g, "")
+    .replace(/kgCO2e/g, "")
+    .replace(/kgCO₂e/g, "")
+    .replace(/hrs/g, "")
+    .replace(/hr/g, "")
+    .replace(/h/g, "");
+
+  const n = Number(cleaned);
+
+  return Number.isFinite(n) ? n : fallback;
+}
+function mapExternalRow(r,i){
+  const C = safeNumber(r.Cost_NZD ?? r.cost_nzd ?? r.Total_cost_NZD ?? r.C_total ?? null);
+  const E = safeNumber(r.Carbon_kgCO2e ?? r.carbon_kgco2e ?? r.Total_carbon_kgCO2e ?? r.CO2_total ?? r.CFS_framing_A1_A5_carbon_kgCO2e ?? null);
+  const T = safeNumber(r.Time_hours ?? r.time_hours ?? r.Total_time_hours ?? r.T_total ?? r.Construction_process_hours ?? null);
+
+  // IMPORTANT:
+  // For imported Python outputs, trust the Python-calculated normalised objective columns first.
+  // Do not recompute normalised values from the dashboard's embedded baseline unless the CSV lacks them.
+  // This prevents the dashboard from compressing the Pareto front to Cost/S2 < 1 when B.C_S2_reference differs.
+  const cnImported = safeNumber(r.Cost_normalized ?? r.Cost_norm ?? null);
+  const enImported = safeNumber(r.Carbon_normalized ?? r.Carbon_norm ?? null);
+  const tnImported = safeNumber(r.Time_normalized ?? r.Time_norm ?? null);
+
+  const cn = Number.isFinite(cnImported) ? cnImported :
+             (Number.isFinite(C) && B.C_S2_reference ? C / B.C_S2_reference : NaN);
+
+  const en = Number.isFinite(enImported) ? enImported :
+             (Number.isFinite(E) && B.CO2_S2_reference ? E / B.CO2_S2_reference : NaN);
+
+  const tn = Number.isFinite(tnImported) ? tnImported :
+             (Number.isFinite(T) && B.Time_S2_reference ? T / B.Time_S2_reference : NaN);
+
+  const Rp = safeNumber(r.R_p_panel_rationalisation ?? r.R_p ?? r.Rp ?? r.R_p_panel ?? null, 0);
+  const Rt = safeNumber(r.R_t_truss_rationalisation ?? r.R_t ?? r.Rt ?? r.R_t_truss ?? null, 0);
+  const OC = safeNumber(r.opening_complexity_index ?? r.OC ?? r.oc ?? null, 1.0);
+  const Pf = safeNumber(r.P_f_prefab_level ?? r.P_f ?? r.Pf ?? r.pf ?? null, 0.72);
+
+  const x=[Rp,Rt,OC,Pf];
+  const s=engineeringState(x);
+  const label = r.Case ?? r.Label ?? r.Solution_ID ?? r.Solution ?? `P${i+1}`;
+
+  return {
+    label,
+    Solution_ID: r.Solution_ID ?? r.Solution ?? label,
+    R_p: Rp,
+    R_t: Rt,
+    OC: OC,
+    P_f: Pf,
+    panel_scheme: safeNumber(r.panel_scheme ?? s.panel_scheme, s.panel_scheme),
+    truss_scheme: safeNumber(r.truss_scheme ?? s.truss_scheme, s.truss_scheme),
+    Cost_NZD: Number.isFinite(C) ? C : cn * B.C_S2_reference,
+    Carbon_kgCO2e: Number.isFinite(E) ? E : en * B.CO2_S2_reference,
+    Time_hours: Number.isFinite(T) ? T : tn * B.Time_S2_reference,
+    Cost_normalized: cn,
+    Carbon_normalized: en,
+    Time_normalized: tn,
+    Cost_vs_S2: safeNumber(r['Cost_vs_S2_%'] ?? r.Cost_vs_S2 ?? null, (cn-1)*100),
+    Carbon_vs_S2: safeNumber(r['Carbon_vs_S2_%'] ?? r.Carbon_vs_S2 ?? null, (en-1)*100),
+    Time_vs_S2: safeNumber(r['Time_vs_S2_%'] ?? r.Time_vs_S2 ?? null, (tn-1)*100),
+    NZ_feasible: r.NZ_feasible ?? true
+  };
+}
+
+function getParetoSet(){
+  if(forceScenarioEmbeddedFront){
+    return buildEmbeddedPareto();
+  }
+  if(usingImported && importedPareto && importedPareto.length){ return importedPareto.map(mapExternalRow).filter(r=>Number.isFinite(r.Cost_normalized)&&Number.isFinite(r.Carbon_normalized)&&Number.isFinite(r.Time_normalized)); }
+  return buildEmbeddedPareto();
+}
+function buildEmbeddedPareto(){
+  const rows=[]; const Rps=[0,0.2,0.4,0.6,0.8,1.0]; const Rts=[0,0.25,0.5,0.75,1.0]; const OCs=[0.80,0.90,1.00,1.15,1.30]; const Pfs=[0.50,0.55,0.60,0.65,0.70,0.72,0.75,0.80,0.85,0.90];
+  let id=1;
+  for(const rp of Rps){ for(const rt of Rts){ for(const oc of OCs){ for(const pf of Pfs){ const rec=objectiveRecord([rp,rt,oc,pf]); rows.push({label:`E${id}`, Solution_ID:`E${id++}`, R_p:rp, R_t:rt, OC:oc, P_f:pf, panel_scheme:rec.panel_scheme, truss_scheme:rec.truss_scheme, Cost_NZD:rec.Cost_NZD, Carbon_kgCO2e:rec.Carbon_kgCO2e, Time_hours:rec.Time_hours, Cost_normalized:rec.Cost_normalized, Carbon_normalized:rec.Carbon_normalized, Time_normalized:rec.Time_normalized, Cost_vs_S2:rec.Cost_vs_S2, Carbon_vs_S2:rec.Carbon_vs_S2, Time_vs_S2:rec.Time_vs_S2, NZ_feasible:nzConstraintReport([rp,rt,oc,pf]).NZ_feasible}); } } } }
+  return paretoFilter(rows).slice(0,1200);
+}
+function paretoFilter(rows){
+  return rows.filter((p,i)=>!rows.some((q,j)=> i!==j && q.Cost_normalized<=p.Cost_normalized && q.Carbon_normalized<=p.Carbon_normalized && q.Time_normalized<=p.Time_normalized && (q.Cost_normalized<p.Cost_normalized || q.Carbon_normalized<p.Carbon_normalized || q.Time_normalized<p.Time_normalized)));
+}
+function representativeRows(){
+  if(!forceScenarioEmbeddedFront && usingImported && importedRepresentatives && importedRepresentatives.length){
+    return importedRepresentatives.map(mapExternalRow);
+  }
+
+  const p = getParetoSet();
+  if(!p.length) return [];
+
+  const minC = p.reduce((a,b) => b.Cost_NZD < a.Cost_NZD ? b : a);
+  const minE = p.reduce((a,b) => b.Carbon_kgCO2e < a.Carbon_kgCO2e ? b : a);
+  const minT = p.reduce((a,b) => b.Time_hours < a.Time_hours ? b : a);
+  const bal = p.reduce((a,b) =>
+    (b.Cost_normalized + b.Carbon_normalized + b.Time_normalized <
+     a.Cost_normalized + a.Carbon_normalized + a.Time_normalized) ? b : a
+  );
+
+  const s2 = mapExternalRow({
+    Case: 'S2 reference',
+    Solution_ID: 'S2',
+    R_p_panel_rationalisation: 0,
+    R_t_truss_rationalisation: 0,
+    opening_complexity_index: 1,
+    P_f_prefab_level: 0.72,
+    Cost_NZD: B.C_S2_reference,
+    Carbon_kgCO2e: B.CO2_S2_reference,
+    Time_hours: B.Time_S2_reference
+  }, 999);
+
+  const reps = [
+    {...minC, label: 'Min cost'},
+    {...minE, label: 'Min carbon'},
+    {...minT, label: 'Min time'},
+    {...bal, label: 'Balanced'},
+    s2
+  ];
+
+  const seen = new Set();
+
+  return reps.filter(r => {
+    const key = [r.R_p, r.R_t, r.OC, r.P_f, r.label].join('|');
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+// ============================================================================
+// UI rendering
+// ============================================================================
+function chart(id,type,data,options={}){ const el=document.getElementById(id); if(!el || !window.Chart) return null; if(charts[id]) charts[id].destroy(); charts[id]=new Chart(el,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},...options}}); return charts[id]; }
+const grid={color:'rgba(255,255,255,.08)'}; const ticks={color:'#94a3b8',font:{family:'JetBrains Mono',size:10}};
+function setDelta(id,val){ const el=document.getElementById(id); el.textContent=pctText(val)+' vs S2'; el.className='delta '+(val<-0.3?'good':val>0.3?'bad':'flat'); }
+function readSliders(){ state.R_p=Number(document.getElementById('rp').value)/1000; state.R_t=Number(document.getElementById('rt').value)/1000; state.OC=Number(document.getElementById('oc').value)/1000; state.P_f=Number(document.getElementById('pf').value)/1000; }
+function writeSliders(){ document.getElementById('rp').value=Math.round(state.R_p*1000); document.getElementById('rt').value=Math.round(state.R_t*1000); document.getElementById('oc').value=Math.round(state.OC*1000); document.getElementById('pf').value=Math.round(state.P_f*1000); }
+function updateAll(){
+  recomputeReferences(); readSliders(); updateDesignPanel(); updateBadges(); renderVisible();
+}
+function updateDesignPanel(){
+  const x=currentX(); const rec=objectiveRecord(x); const s=engineeringState(x); const con=nzConstraintReport(x);
+  document.getElementById('rp-val').textContent=fmt2(state.R_p); document.getElementById('rt-val').textContent=fmt2(state.R_t); document.getElementById('oc-val').textContent=fmt2(state.OC); document.getElementById('pf-val').textContent=fmt2(state.P_f);
+  document.getElementById('rp-hint').textContent=`Mapped panel reporting category: S${s.panel_scheme}; effective classes = ${s.N_panel_classes.toFixed(2)}`;
+  document.getElementById('rt-hint').textContent=`Mapped truss reporting category: T${s.truss_scheme}; effective types = ${s.N_truss_types.toFixed(2)}`;
+  document.getElementById('oc-hint').textContent= state.OC<1 ? 'Lower OC: more standardised opening/detailing modules' : state.OC>1.15 ? 'Higher OC: custom opening/detailing coordination' : 'Near S2 reference detailing complexity';
+  document.getElementById('pf-hint').textContent= state.P_f<0.60 ? 'Low prefabrication regime' : state.P_f>0.80 ? 'High prefabrication / factory saturation region' : 'Medium prefabrication regime';
+  document.getElementById('m-cost').textContent='$'+fmt0(rec.Cost_NZD); document.getElementById('m-carbon').textContent=fmt0(rec.Carbon_kgCO2e); document.getElementById('m-time').textContent=fmt1(rec.Time_hours);
+  setDelta('d-cost',rec.Cost_vs_S2); setDelta('d-carbon',rec.Carbon_vs_S2); setDelta('d-time',rec.Time_vs_S2);
+  const status=[];
+  status.push({ok:con.NZ_feasible, text:con.NZ_feasible?'Hard constructability screen OK':'Hard constructability violation'});
+  status.push({ok:con.factory_repetition_score>=B.min_factory_repetition_score, warn:true, text:`Factory repetition score = ${con.factory_repetition_score.toFixed(3)}`});
+  status.push({ok:state.OC<=B.max_OCI_soft, warn:true, text:`OC soft screen ${state.OC<=B.max_OCI_soft?'OK':'above preferred limit'}`});
+  status.push({ok:true, text:`Panel lift mass ≈ ${con.panel_lift_mass_kg.toFixed(1)} kg; max panel width = ${con.max_panel_width_m.toFixed(2)} m`});
+  document.getElementById('constraint-status').innerHTML=status.map(s=>`<div class="status"><span class="dot ${s.ok?'':(s.warn?'warn':'bad')}"></span><span>${s.text}</span></div>`).join('');
+  renderBreakdown('bd-cost', costComponents(x), 'NZD', 'blue'); renderBreakdown('bd-carbon', carbonComponents(x), 'kg', 'green'); renderBreakdown('bd-time', timeComponents(x), 'hr', 'yellow'); renderRadar();
+}
+function updateBadges(){
+  document.getElementById('badge-cost').textContent = '$' + fmt0(B.C_S2_reference);
+  document.getElementById('badge-carbon').textContent = fmt0(B.CO2_S2_reference) + ' kg';
+  document.getElementById('badge-time').textContent = fmt1(B.Time_S2_reference) + ' hr';
+
+  if(forceScenarioEmbeddedFront){
+    document.getElementById('badge-mode').textContent = 'Embedded scenario front';
+  }else{
+    document.getElementById('badge-mode').textContent = usingImported ? 'Latest Python output' : 'Embedded fallback';
+  }
+}
+function renderBreakdown(id, comps, unit, color){ const el=document.getElementById(id); if(!el) return; const maxv=Math.max(...Object.values(comps).map(v=>Math.abs(v)),1); el.innerHTML=''; Object.entries(comps).forEach(([k,v])=>{ const w=Math.max(2,Math.abs(v)/maxv*100); let val = unit==='NZD' ? (v<0?'-':'')+'$'+fmt0(Math.abs(v)) : (v<0?'-':'')+fmt1(Math.abs(v))+' '+unit; const cls=v<0?'green':color; el.innerHTML += `<div class="bar-row"><div class="bar-label">${k.replaceAll('_',' ')}</div><div class="bar-wrap"><div class="bar ${cls}" style="width:${w}%"></div></div><div class="bar-val">${val}</div></div>`; }); const total=sumValues(comps); el.innerHTML += `<div class="bar-row" style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px"><div class="bar-label" style="color:var(--text)">Total</div><div></div><div class="bar-val" style="font-weight:700">${unit==='NZD'?'$'+fmt0(total):fmt1(total)+' '+unit}</div></div>`; }
+function renderRadar(){ const rec=objectiveRecord(currentX()); chart('radar','radar',{labels:['Cost','Carbon','Time'],datasets:[{label:'Current design',data:[rec.Cost_normalized,rec.Carbon_normalized,rec.Time_normalized],borderColor:'#34d399',backgroundColor:'rgba(52,211,153,.10)',pointBackgroundColor:'#34d399',borderWidth:2},{label:'S2 reference',data:[1,1,1],borderColor:'rgba(255,255,255,.35)',borderDash:[5,5],backgroundColor:'transparent',pointBackgroundColor:'#94a3b8'}]}, {plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{family:'JetBrains Mono',size:10}}}},scales:{r:{min:0.70,max:1.30,grid,pointLabels:{color:'#94a3b8'},ticks:{color:'#94a3b8',backdropColor:'transparent',stepSize:.1}}}}); }
+function paretoAxisRange(pts, key){
+  const vals = pts.map(p => Number(p[key])).filter(Number.isFinite);
+  if(!vals.length) return {min:0.95, max:1.05};
+  const mn = Math.min(...vals);
+  const mx = Math.max(...vals);
+  const span = Math.max(mx - mn, 1e-9);
+  const pad = Math.max(span * 0.08, 0.002);
+  return {min: mn - pad, max: mx + pad};
+}
+
+function renderParetoCharts(){
+  const pts = getParetoSet()
+    .filter(p =>
+      Number.isFinite(Number(p.Cost_normalized)) &&
+      Number.isFinite(Number(p.Carbon_normalized)) &&
+      Number.isFinite(Number(p.Time_normalized))
+    );
+
+  function axisRange(rows, key){
+    const vals = rows.map(r => Number(r[key])).filter(Number.isFinite);
+    vals.push(1.0);
+
+    const minVal = Math.min(...vals);
+    const maxVal = Math.max(...vals);
+    const span = Math.max(maxVal - minVal, 1e-9);
+    const pad = span * 0.08;
+
+    return { min: minVal - pad, max: maxVal + pad };
+  }
+
+  function colorByPf(p){
+    const pf = Number(p.P_f);
+    if(!Number.isFinite(pf)) return 'rgba(52,211,153,.70)';
+    const a = 0.35 + 0.60 * ((pf - 0.50) / 0.40);
+    return `rgba(52,211,153,${Math.max(0.25, Math.min(0.95, a))})`;
+  }
+
+  function scatter(id, x, y, xlab, ylab){
+    const xr = axisRange(pts, x);
+    const yr = axisRange(pts, y);
+
+    chart(
+      id,
+      'scatter',
+      {
+        datasets: [
+          {
+            label: 'Pareto',
+            data: pts.map(p => ({ x: Number(p[x]), y: Number(p[y]) })),
+            backgroundColor: pts.map(colorByPf),
+            borderColor: pts.map(colorByPf),
+            pointRadius: 4,
+            pointHoverRadius: 6
+          },
+          {
+            label: 'S2 reference',
+            data: [{ x: 1.0, y: 1.0 }],
+            backgroundColor: '#f8fafc',
+            borderColor: '#0f172a',
+            borderWidth: 2,
+            pointRadius: 10,
+            pointHoverRadius: 12,
+            pointStyle: 'star'
+          }
+        ]
+      },
+      {
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: '#94a3b8',
+              font: { family: 'JetBrains Mono', size: 10 }
+            },
+            onClick: function(e, legendItem, legend){
+              if(legendItem.text === 'S2 reference'){
+                resetDesign();
+                showPage('design');
+                updateAll();
+                return;
+              }
+
+              const ci = legend.chart;
+              const index = legendItem.datasetIndex;
+              const meta = ci.getDatasetMeta(index);
+
+              meta.hidden = meta.hidden === null
+                ? !ci.data.datasets[index].hidden
+                : null;
+
+              ci.update();
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context){
+                if(context.dataset.label === 'S2 reference'){
+                  return 'S2 reference: 1.000, 1.000';
+                }
+                return `${xlab}: ${context.parsed.x.toFixed(4)}, ${ylab}: ${context.parsed.y.toFixed(4)}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            min: xr.min,
+            max: xr.max,
+            title: { display: true, text: xlab, color: '#94a3b8' },
+            ticks,
+            grid
+          },
+          y: {
+            min: yr.min,
+            max: yr.max,
+            title: { display: true, text: ylab, color: '#94a3b8' },
+            ticks,
+            grid
+          }
+        }
+      }
+    );
+  }
+
+  scatter('pc-cost-carbon', 'Cost_normalized', 'Carbon_normalized', 'Cost / S2', 'Carbon / S2');
+  scatter('pc-cost-time', 'Cost_normalized', 'Time_normalized', 'Cost / S2', 'Time / S2');
+  scatter('pc-carbon-time', 'Carbon_normalized', 'Time_normalized', 'Carbon / S2', 'Time / S2');
+
+  renderPfSweep();
+}
+
+function renderPfSweep(){ const labels=[], costD=[], carbonD=[], timeD=[]; for(let i=50;i<=90;i+=2){ const pf=i/100; const x=[state.R_p,state.R_t,state.OC,pf]; const r=objectiveRecord(x); labels.push(pf.toFixed(2)); costD.push(r.Cost_normalized); carbonD.push(r.Carbon_normalized); timeD.push(r.Time_normalized); } chart('pf-sweep','line',{labels,datasets:[{label:'Cost',data:costD,borderColor:'#60a5fa',pointRadius:0,tension:.35},{label:'Carbon',data:carbonD,borderColor:'#34d399',pointRadius:0,tension:.35},{label:'Time',data:timeD,borderColor:'#fbbf24',pointRadius:0,tension:.35},{label:'S2',data:labels.map(()=>1),borderColor:'rgba(255,255,255,.25)',borderDash:[4,4],pointRadius:0}]},{plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{family:'JetBrains Mono',size:10}}}},scales:{x:{ticks,grid,title:{display:true,text:'P_f',color:'#94a3b8'}},y:{ticks,grid,title:{display:true,text:'Normalised objective',color:'#94a3b8'}}}}); }
+function renderRepTable(){ const reps=representativeRows(); const table=document.getElementById('rep-table'); if(!table) return; table.innerHTML='<thead><tr><th>Case</th><th>R_p</th><th>R_t</th><th>OC</th><th>P_f</th><th>Cost</th><th>Carbon</th><th>Time</th><th>Cost Δ</th><th>Carbon Δ</th><th>Time Δ</th></tr></thead><tbody>'+reps.map((r,i)=>`<tr class="clickable" onclick="loadRow(${i})"><td>${r.label}</td><td>${Number(r.R_p).toFixed(3)}</td><td>${Number(r.R_t).toFixed(3)}</td><td>${Number(r.OC).toFixed(3)}</td><td>${Number(r.P_f).toFixed(3)}</td><td>$${fmt0(r.Cost_NZD)}</td><td>${fmt0(r.Carbon_kgCO2e)}</td><td>${fmt1(r.Time_hours)}</td><td class="${r.Cost_vs_S2<0?'neg':r.Cost_vs_S2>0?'pos':'zero'}">${pctText(r.Cost_vs_S2)}</td><td class="${r.Carbon_vs_S2<0?'neg':r.Carbon_vs_S2>0?'pos':'zero'}">${pctText(r.Carbon_vs_S2)}</td><td class="${r.Time_vs_S2<0?'neg':r.Time_vs_S2>0?'pos':'zero'}">${pctText(r.Time_vs_S2)}</td></tr>`).join('')+'</tbody>'; window.__repRows=reps; }
+function loadRow(i){ const r=window.__repRows[i]; if(!r) return; state={R_p:Number(r.R_p),R_t:Number(r.R_t),OC:Number(r.OC),P_f:Number(r.P_f)}; writeSliders(); showPage('design'); updateAll(); }
+
+function stratifiedSampleRows(rows, maxRows = 420){
+  if(!Array.isArray(rows)) return [];
+  const clean = rows.filter(r =>
+    Number.isFinite(Number(r.R_p)) &&
+    Number.isFinite(Number(r.R_t)) &&
+    Number.isFinite(Number(r.OC)) &&
+    Number.isFinite(Number(r.P_f)) &&
+    Number.isFinite(Number(r.Cost_normalized)) &&
+    Number.isFinite(Number(r.Carbon_normalized)) &&
+    Number.isFinite(Number(r.Time_normalized))
+  );
+
+  if(clean.length <= maxRows) return clean;
+
+  const out = [];
+  const step = clean.length / maxRows;
+
+  for(let i = 0; i < maxRows; i++){
+    out.push(clean[Math.floor(i * step)]);
+  }
+
+  return out;
+}
+
+function renderParallel(){
+  const raw = getParetoSet();
+  const pts = stratifiedSampleRows(raw, 420);
+
+  const canvas = document.getElementById('parallel');
+  if(!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+
+  const W = canvas.clientWidth || 1300;
+  const H = canvas.clientHeight || 760;
+
+  canvas.width = W;
+  canvas.height = H;
+
+  ctx.clearRect(0, 0, W, H);
+
+  if(!pts.length){
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '14px JetBrains Mono';
+    ctx.fillText('No Pareto data available for parallel coordinates.', 30, 40);
+    return;
+  }
+
+  const cols = [
+    'R_p',
+    'R_t',
+    'OC',
+    'P_f',
+    'Cost_normalized',
+    'Carbon_normalized',
+    'Time_normalized'
+  ];
+
+  const labels = [
+    'R_p',
+    'R_t',
+    'OC',
+    'P_f',
+    'Cost/S2',
+    'Carbon/S2',
+    'Time/S2'
+  ];
+
+  const meanings = [
+    'Panel rationalisation intensity',
+    'Truss rationalisation intensity',
+    'Opening/detailing complexity',
+    'Prefabrication level',
+    'Cost relative to S2',
+    'A1–A5 carbon relative to S2',
+    'Process-hours relative to S2'
+  ];
+
+  const vals = cols.map(c =>
+    pts.map(p => Number(p[c])).filter(Number.isFinite)
+  );
+
+  const min = vals.map(a => Math.min(...a));
+  const max = vals.map(a => Math.max(...a));
+
+  const mx = 90;
+  const my = 65;
+  const bw = W - 2 * mx;
+  const bh = H - 170;
+
+  const xs = cols.map((_, i) => mx + i * bw / (cols.length - 1));
+
+  function py(v, j){
+    const value = Number(v);
+    const span = max[j] - min[j];
+
+    if(!Number.isFinite(value)) return my + bh / 2;
+    if(Math.abs(span) < 1e-12) return my + bh / 2;
+
+    const n = (value - min[j]) / span;
+    return my + (1 - n) * bh;
+  }
+
+  const minC = Math.min(...pts.map(p => Number(p.Cost_normalized)).filter(Number.isFinite));
+  const minE = Math.min(...pts.map(p => Number(p.Carbon_normalized)).filter(Number.isFinite));
+  const minT = Math.min(...pts.map(p => Number(p.Time_normalized)).filter(Number.isFinite));
+
+  pts.forEach(p => {
+    const isCost = Math.abs(Number(p.Cost_normalized) - minC) < 1e-10;
+    const isCarbon = Math.abs(Number(p.Carbon_normalized) - minE) < 1e-10;
+    const isTime = Math.abs(Number(p.Time_normalized) - minT) < 1e-10;
+
+    ctx.beginPath();
+    ctx.moveTo(xs[0], py(p[cols[0]], 0));
+
+    for(let j = 1; j < cols.length; j++){
+      ctx.lineTo(xs[j], py(p[cols[j]], j));
+    }
+
+    if(isCost){
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 3.0;
+    }else if(isCarbon){
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 3.0;
+    }else if(isTime){
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 3.0;
+    }else{
+      ctx.strokeStyle = 'rgba(203,213,225,.075)';
+      ctx.lineWidth = 1.0;
+    }
+
+    ctx.stroke();
+  });
+
+  labels.forEach((l, i) => {
+    ctx.strokeStyle = 'rgba(255,255,255,.22)';
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+    ctx.moveTo(xs[i], my);
+    ctx.lineTo(xs[i], my + bh);
+    ctx.stroke();
+
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = '13px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText(l, xs[i], H - 58);
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px JetBrains Mono';
+    ctx.fillText(max[i].toFixed(3), xs[i], my - 14);
+    ctx.fillText(min[i].toFixed(3), xs[i], my + bh + 20);
+  });
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '11px JetBrains Mono';
+  ctx.textAlign = 'left';
+  ctx.fillText(
+    `Showing ${pts.length} stratified alternatives from ${raw.length} Pareto rows. Each axis is independently scaled.`,
+    mx,
+    H - 18
+  );
+
+  const box = document.getElementById('parallel-axis-table');
+
+  if(box){
+    let html = '<table class="tbl"><thead><tr><th>Axis</th><th>Minimum</th><th>Maximum</th><th>Meaning</th></tr></thead><tbody>';
+
+    labels.forEach((l, i) => {
+      html += `<tr>
+        <td>${escapeHTML(l)}</td>
+        <td>${min[i].toFixed(4)}</td>
+        <td>${max[i].toFixed(4)}</td>
+        <td>${escapeHTML(meanings[i])}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    box.innerHTML = html;
+  }
+}
+
+// ============================================================================
+// Scenario assumption controls and Pareto regeneration controls
+// ============================================================================
+function getScenarioAssumptionsFromB(src = B){
+  return {
+    raw_steel_material_nzd_per_kg: Number(src.raw_steel_material_nzd_per_kg),
+    factory_processing_nzd_per_kg: Number(src.factory_processing_nzd_per_kg),
+    site_labor_rate_nzd_per_hr: Number(src.site_labor_rate_nzd_per_hr),
+    a4_default_transport_distance_km: Number(src.a4_default_transport_distance_km),
+    freight_kgco2e_per_tonne_km: Number(src.freight_kgco2e_per_tonne_km),
+    steel_carbon_factor_a1_a3_kgco2e_per_kg: Number(src.steel_carbon_factor_a1_a3_kgco2e_per_kg),
+    a5_installation_carbon_kgco2e_per_m2: Number(src.a5_installation_carbon_kgco2e_per_m2)
+  };
+}
+
+function applyScenarioAssumptionsToB(values){
+  B.raw_steel_material_nzd_per_kg = Number(values.raw_steel_material_nzd_per_kg);
+  B.factory_processing_nzd_per_kg = Number(values.factory_processing_nzd_per_kg);
+  B.site_labor_rate_nzd_per_hr = Number(values.site_labor_rate_nzd_per_hr);
+  B.delivery_logistics_rate_nzd_per_hr = Number(values.site_labor_rate_nzd_per_hr);
+  B.site_mobilisation_rate_nzd_per_hr = Number(values.site_labor_rate_nzd_per_hr);
+  B.a4_default_transport_distance_km = Number(values.a4_default_transport_distance_km);
+  B.freight_kgco2e_per_tonne_km = Number(values.freight_kgco2e_per_tonne_km);
+  B.steel_carbon_factor_a1_a3_kgco2e_per_kg = Number(values.steel_carbon_factor_a1_a3_kgco2e_per_kg);
+  B.a5_installation_carbon_kgco2e_per_m2 = Number(values.a5_installation_carbon_kgco2e_per_m2);
+}
+
+function initialiseScenarioControlsFromCurrentB(){
+  baselineScenarioAssumptions = getScenarioAssumptionsFromB(B);
+  writeScenarioControls(baselineScenarioAssumptions);
+  scenarioApplied = false;
+  forceScenarioEmbeddedFront = false;
+}
+
+function writeScenarioControls(values){
+  const map = {
+    'sc-steel-cost': values.raw_steel_material_nzd_per_kg,
+    'sc-factory-cost': values.factory_processing_nzd_per_kg,
+    'sc-labour-rate': values.site_labor_rate_nzd_per_hr,
+    'sc-transport-distance': values.a4_default_transport_distance_km,
+    'sc-freight-carbon': values.freight_kgco2e_per_tonne_km,
+    'sc-steel-carbon': values.steel_carbon_factor_a1_a3_kgco2e_per_kg,
+    'sc-a5-carbon': values.a5_installation_carbon_kgco2e_per_m2
+  };
+
+  Object.entries(map).forEach(([id,value]) => {
+    const el = document.getElementById(id);
+    if(el) el.value = Number(value).toFixed(id.includes('freight') ? 3 : 2);
+  });
+}
+
+function readScenarioControls(){
+  function value(id, fallback){
+    const el = document.getElementById(id);
+    const n = Number(el ? el.value : fallback);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  const fallback = baselineScenarioAssumptions || getScenarioAssumptionsFromB(B);
+
+  return {
+    raw_steel_material_nzd_per_kg: value('sc-steel-cost', fallback.raw_steel_material_nzd_per_kg),
+    factory_processing_nzd_per_kg: value('sc-factory-cost', fallback.factory_processing_nzd_per_kg),
+    site_labor_rate_nzd_per_hr: value('sc-labour-rate', fallback.site_labor_rate_nzd_per_hr),
+    a4_default_transport_distance_km: value('sc-transport-distance', fallback.a4_default_transport_distance_km),
+    freight_kgco2e_per_tonne_km: value('sc-freight-carbon', fallback.freight_kgco2e_per_tonne_km),
+    steel_carbon_factor_a1_a3_kgco2e_per_kg: value('sc-steel-carbon', fallback.steel_carbon_factor_a1_a3_kgco2e_per_kg),
+    a5_installation_carbon_kgco2e_per_m2: value('sc-a5-carbon', fallback.a5_installation_carbon_kgco2e_per_m2)
+  };
+}
+
+function withTemporaryScenarioAssumptions(values, fn){
+  const saved = getScenarioAssumptionsFromB(B);
+  try{
+    applyScenarioAssumptionsToB(values);
+    recomputeReferences();
+    return fn();
+  }finally{
+    applyScenarioAssumptionsToB(saved);
+    recomputeReferences();
+  }
+}
+
+function applyScenarioAssumptions(){
+  const values = readScenarioControls();
+  applyScenarioAssumptionsToB(values);
+  scenarioApplied = true;
+
+  // This makes the browser rebuild its embedded nondominated front under the changed assumptions.
+  // Imported Python Pareto rows are not overwritten; they are bypassed until reset or new import.
+  forceScenarioEmbeddedFront = true;
+
+  recomputeReferences();
+  updateAll();
+  renderScenarioComparisonTable();
+
+  const st = document.getElementById('scenario-status');
+  if(st){
+    st.innerHTML = 'Scenario applied. Embedded dashboard front has been regenerated from the browser response model. For full NSGA-II regeneration, use the Python backend button.';
+  }
+}
+
+function resetScenarioAssumptions(){
+  if(!baselineScenarioAssumptions){
+    baselineScenarioAssumptions = getScenarioAssumptionsFromB(DEFAULT_B);
+  }
+
+  applyScenarioAssumptionsToB(baselineScenarioAssumptions);
+  writeScenarioControls(baselineScenarioAssumptions);
+  scenarioApplied = false;
+  forceScenarioEmbeddedFront = false;
+
+  recomputeReferences();
+  updateAll();
+  renderScenarioComparisonTable();
+
+  const st = document.getElementById('scenario-status');
+  if(st){
+    st.textContent = 'Scenario reset to the current dashboard baseline. Imported Python Pareto data will be used again when available.';
+  }
+}
+
+function regenerateEmbeddedPareto(){
+  forceScenarioEmbeddedFront = true;
+  updateAll();
+
+  const st = document.getElementById('scenario-status');
+  if(st){
+    st.textContent = `Embedded Pareto regenerated under current scenario assumptions. Rows available: ${getParetoSet().length}.`;
+  }
+}
+
+function metricCell(value, unit){
+  if(unit === 'NZD') return '$' + fmt0(value);
+  if(unit === 'kgCO2e') return fmt0(value);
+  if(unit === 'hours') return fmt1(value);
+  return fmt2(value);
+}
+
+function renderScenarioComparisonTable(){
+  const table = document.getElementById('scenario-comparison-table');
+  if(!table) return;
+
+  if(!baselineScenarioAssumptions){
+    baselineScenarioAssumptions = getScenarioAssumptionsFromB(B);
+  }
+
+  const x = currentX();
+  const original = withTemporaryScenarioAssumptions(baselineScenarioAssumptions, () => objectiveRecord(x));
+  const scenario = objectiveRecord(x);
+  const s2Scenario = objectiveRecord(B.x_ref);
+
+  const rows = [
+    {
+      metric: 'Cost',
+      unit: 'NZD',
+      original: original.Cost_NZD,
+      scenario: scenario.Cost_NZD,
+      s2: s2Scenario.Cost_NZD,
+      deltaOriginal: pct(scenario.Cost_NZD, original.Cost_NZD),
+      deltaS2: pct(scenario.Cost_NZD, s2Scenario.Cost_NZD)
+    },
+    {
+      metric: 'Carbon',
+      unit: 'kgCO2e',
+      original: original.Carbon_kgCO2e,
+      scenario: scenario.Carbon_kgCO2e,
+      s2: s2Scenario.Carbon_kgCO2e,
+      deltaOriginal: pct(scenario.Carbon_kgCO2e, original.Carbon_kgCO2e),
+      deltaS2: pct(scenario.Carbon_kgCO2e, s2Scenario.Carbon_kgCO2e)
+    },
+    {
+      metric: 'Process-hours',
+      unit: 'hours',
+      original: original.Time_hours,
+      scenario: scenario.Time_hours,
+      s2: s2Scenario.Time_hours,
+      deltaOriginal: pct(scenario.Time_hours, original.Time_hours),
+      deltaS2: pct(scenario.Time_hours, s2Scenario.Time_hours)
+    }
+  ];
+
+  table.innerHTML =
+    '<thead><tr><th>Metric</th><th>Original selected design</th><th>Scenario selected design</th><th>Scenario S2</th><th>Scenario change vs original</th><th>Scenario selected vs S2</th></tr></thead><tbody>' +
+    rows.map(r => {
+      const d1 = r.deltaOriginal;
+      const d2 = r.deltaS2;
+      return `<tr>
+        <td>${r.metric}</td>
+        <td>${metricCell(r.original, r.unit)}</td>
+        <td>${metricCell(r.scenario, r.unit)}</td>
+        <td>${metricCell(r.s2, r.unit)}</td>
+        <td class="${d1 < 0 ? 'neg' : d1 > 0 ? 'pos' : 'zero'}">${pctText(d1)}</td>
+        <td class="${d2 < 0 ? 'neg' : d2 > 0 ? 'pos' : 'zero'}">${pctText(d2)}</td>
+      </tr>`;
+    }).join('') +
+    '</tbody>';
+}
+
+function exportScenarioMemo(){
+  const values = readScenarioControls();
+  const rec = objectiveRecord(currentX());
+  const lines = [
+    'CFS dashboard scenario memo',
+    '---------------------------',
+    `Design vector: R_p=${state.R_p.toFixed(4)}, R_t=${state.R_t.toFixed(4)}, OC=${state.OC.toFixed(4)}, P_f=${state.P_f.toFixed(4)}`,
+    '',
+    'Scenario assumptions:',
+    `Steel material cost: ${values.raw_steel_material_nzd_per_kg} NZD/kg`,
+    `Factory processing cost: ${values.factory_processing_nzd_per_kg} NZD/kg`,
+    `Site labour rate: ${values.site_labor_rate_nzd_per_hr} NZD/h`,
+    `Transport distance: ${values.a4_default_transport_distance_km} km`,
+    `Freight carbon factor: ${values.freight_kgco2e_per_tonne_km} kgCO2e/tonne-km`,
+    `A1-A3 steel carbon factor: ${values.steel_carbon_factor_a1_a3_kgco2e_per_kg} kgCO2e/kg`,
+    `A5 installation carbon factor: ${values.a5_installation_carbon_kgco2e_per_m2} kgCO2e/m2`,
+    '',
+    'Scenario-adjusted selected design:',
+    `Cost: NZD ${rec.Cost_NZD.toFixed(2)} (${pctText(rec.Cost_vs_S2)} vs scenario S2)`,
+    `Carbon: ${rec.Carbon_kgCO2e.toFixed(2)} kgCO2e (${pctText(rec.Carbon_vs_S2)} vs scenario S2)`,
+    `Time: ${rec.Time_hours.toFixed(2)} hr (${pctText(rec.Time_vs_S2)} vs scenario S2)`,
+    '',
+    'Note: Apply scenario regenerates the embedded browser front only. Full NSGA-II regeneration requires the local Python backend.'
+  ];
+
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+  a.download = 'cfs_dashboard_scenario_memo.txt';
+  a.click();
+}
+
+function renderScenarios(){ renderScenarioComparisonTable(); const scenarios=[{id:'S1 low prefab',x:[0,0,1,0.50]},{id:'S2 reference',x:B.x_ref},{id:'S3 high prefab',x:[0,0,1,0.90]}].map(s=>({...s,rec:objectiveRecord(s.x)})); document.getElementById('scenario-cards').innerHTML=scenarios.map(s=>`<div class="small-card"><div class="tag">${s.id}</div><div class="body">P_f = ${s.x[3].toFixed(2)}<br>Cost: $${fmt0(s.rec.Cost_NZD)}<br>Carbon: ${fmt0(s.rec.Carbon_kgCO2e)} kgCO₂e<br>Time: ${fmt1(s.rec.Time_hours)} hr</div></div>`).join(''); chart('scenario-abs','bar',{labels:scenarios.map(s=>s.id),datasets:[{label:'Cost / 100',data:scenarios.map(s=>s.rec.Cost_NZD/100),backgroundColor:'rgba(96,165,250,.65)'},{label:'Carbon',data:scenarios.map(s=>s.rec.Carbon_kgCO2e),backgroundColor:'rgba(52,211,153,.65)'},{label:'Time × 10',data:scenarios.map(s=>s.rec.Time_hours*10),backgroundColor:'rgba(251,191,36,.65)'}]},{plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{family:'JetBrains Mono',size:10}}}},scales:{x:{ticks,grid},y:{ticks,grid}}}); chart('scenario-delta','bar',{labels:scenarios.map(s=>s.id),datasets:[{label:'Cost %',data:scenarios.map(s=>s.rec.Cost_vs_S2),backgroundColor:'rgba(96,165,250,.65)'},{label:'Carbon %',data:scenarios.map(s=>s.rec.Carbon_vs_S2),backgroundColor:'rgba(52,211,153,.65)'},{label:'Time %',data:scenarios.map(s=>s.rec.Time_vs_S2),backgroundColor:'rgba(251,191,36,.65)'}]},{plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{family:'JetBrains Mono',size:10}}}},scales:{x:{ticks,grid},y:{ticks,grid,title:{display:true,text:'% vs S2',color:'#94a3b8'}}}}); renderOcInteraction(); }
+function renderOcInteraction(){ const labels=[]; for(let i=50;i<=90;i+=2) labels.push((i/100).toFixed(2)); const ocs=[0.80,1.00,1.15,1.30]; chart('oc-interaction','line',{labels,datasets:ocs.map((oc,i)=>({label:'OC '+oc.toFixed(2),data:labels.map(pf=>objectiveRecord([0,0,oc,Number(pf)]).Cost_normalized),borderColor:['#34d399','#60a5fa','#fbbf24','#f87171'][i],pointRadius:0,tension:.35})).concat([{label:'S2',data:labels.map(()=>1),borderColor:'rgba(255,255,255,.25)',borderDash:[4,4],pointRadius:0}])},{plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{family:'JetBrains Mono',size:10}}}},scales:{x:{ticks,grid,title:{display:true,text:'P_f',color:'#94a3b8'}},y:{ticks,grid,title:{display:true,text:'Cost / S2',color:'#94a3b8'}}}}); }
+
+function escapeHTML(v){
+  return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function normalisePercentValue(v){
+  const n = Number(v);
+  if(!Number.isFinite(n)) return NaN;
+  return Math.abs(n) <= 1 ? n*100 : n;
+}
+function parseCSV(text){
+  const rows=[]; let row=[], val='', q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i], n=text[i+1];
+    if(c==='"' && q && n==='"'){ val+='"'; i++; continue; }
+    if(c==='"'){ q=!q; continue; }
+    if(c===',' && !q){ row.push(val); val=''; continue; }
+    if((c==='\n' || c==='\r') && !q){
+      if(c==='\r' && n==='\n') i++;
+      row.push(val); val='';
+      if(row.some(x=>String(x).trim()!=='')) rows.push(row);
+      row=[]; continue;
+    }
+    val+=c;
+  }
+  row.push(val);
+  if(row.some(x=>String(x).trim()!=='')) rows.push(row);
+  if(!rows.length) return [];
+  const headers=rows[0].map(h=>String(h).trim().replace(/^\ufeff/,''));
+  return rows.slice(1).map(r=>{
+    const obj={};
+    headers.forEach((h,i)=>{
+      const raw=(r[i] ?? '').trim();
+      const num=Number(raw);
+      obj[h]= raw!=='' && Number.isFinite(num) ? num : raw;
+    });
+    return obj;
+  });
+}
+function inferDatasetFromName(name){
+  const n=String(name).toLowerCase();
+  if(n.includes('pareto_front')) return 'pareto';
+  if(n.includes('representative_solutions')) return 'representatives';
+  if(n.includes('monte_carlo')) return 'monte_carlo';
+  if(n.includes('topsis')) return 'topsis';
+  if(n.includes('lhs_prcc') || n.includes('lhs_spearman') || n.includes('sensitivity_oat') || n.includes('sensitivity')) return 'sensitivity';
+  if(n.includes('validation_status') || n.includes('validation_notes')) return 'validation_notes';
+  if(n.includes('hypervolume')) return 'hypervolume';
+  if(n.includes('component_breakdown_cost')) return 'component_cost';
+  if(n.includes('component_breakdown_carbon')) return 'component_carbon';
+  if(n.includes('component_breakdown_time')) return 'component_time';
+  return 'unknown';
+}
+function importCSVBundle(event){
+  const files=Array.from(event.target.files || []);
+  if(!files.length) return;
+  let done=0; const loaded=[];
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const rows=parseCSV(e.target.result);
+        const kind=inferDatasetFromName(file.name);
+        if(kind==='pareto') importedPareto=rows;
+        else if(kind==='representatives') importedRepresentatives=rows;
+        else if(kind==='monte_carlo') importedMonteCarlo=rows;
+        else if(kind==='topsis') importedTopsis=rows;
+        else if(kind==='sensitivity') importedSensitivity=rows;
+        else if(kind==='validation_notes') importedValidationNotes=rows;
+        else if(kind==='hypervolume') importedHypervolume=rows;
+        else if(kind==='component_cost') importedComponentBreakdowns.cost=rows;
+        else if(kind==='component_carbon') importedComponentBreakdowns.carbon=rows;
+        else if(kind==='component_time') importedComponentBreakdowns.time=rows;
+        loaded.push(`${file.name} → ${kind} (${rows.length})`);
+      }catch(err){
+        loaded.push(`${file.name} → failed: ${err.message}`);
+      }
+      done++;
+      if(done===files.length){
+        usingImported = !!(importedPareto && importedPareto.length);
+        updateAll();
+        const el=document.getElementById('csv-status');
+        if(el) el.innerHTML = loaded.map(escapeHTML).join('<br>');
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+function lookupMonteCarloForSolution(label){
+  if(!importedMonteCarlo || !importedMonteCarlo.length) return null;
+  const key=String(label ?? '').toLowerCase();
+  return importedMonteCarlo.find(r=>{
+    const vals=[r.Solution,r.Solution_ID,r.Case,r.Label].map(v=>String(v ?? '').toLowerCase());
+    return vals.includes(key);
+  }) || null;
+}
+function mcRiskScore(row){
+  if(!row) return null;
+  if(Number.isFinite(Number(row.Robust_score))) return Number(row.Robust_score);
+  const probs=[
+    row['P_cost_better_than_paired_S2_%'],
+    row['P_carbon_better_than_paired_S2_%'],
+    row['P_time_better_than_paired_S2_%'],
+    row['p_dominates_paired_S2'],
+    row['P_dominates_paired_S2_%']
+  ].map(normalisePercentValue).filter(Number.isFinite);
+  if(!probs.length) return null;
+  return 1.0 - Math.min(...probs)/100.0;
+}
+function riskBadge(score){
+  if(score===null || !Number.isFinite(score)) return '<span class="audit-badge audit-warn">deterministic only</span>';
+  if(score <= 0.25) return '<span class="audit-badge audit-ok">low uncertainty risk</span>';
+  if(score <= 0.50) return '<span class="audit-badge audit-warn">moderate uncertainty risk</span>';
+  return '<span class="audit-badge audit-bad">high uncertainty risk</span>';
+}
+function importedOutputStatus(){
+  return [
+    ['Pareto front', importedPareto?.length || 0, 'pareto_front_*.csv / dashboard_config.pareto'],
+    ['Representative solutions', importedRepresentatives?.length || 0, 'representative_solutions_*.csv / dashboard_config.representatives'],
+    ['Monte Carlo robustness', importedMonteCarlo?.length || 0, 'monte_carlo_robustness_*.csv / dashboard_config.monte_carlo'],
+    ['Sensitivity', importedSensitivity?.length || 0, 'lhs_prcc/spearman/sensitivity_oat / dashboard_config.sensitivity'],
+    ['TOPSIS ranking', importedTopsis?.length || 0, 'topsis_stakeholder_ranking_*.csv / dashboard_config.topsis'],
+    ['Validation ranges', importedValidationRanges ? Object.keys(importedValidationRanges).length : 0, 'dashboard_config.validation_ranges']
+  ];
+}
+
+
+function renderSensitivity(){
+  const vars=[
+    ['R_p',[0,0,1,0.72],[1,0,1,0.72]],
+    ['R_t',[0,0,1,0.72],[0,1,1,0.72]],
+    ['OC',[0,0,0.80,0.72],[0,0,1.30,0.72]],
+    ['P_f',[0,0,1,0.50],[0,0,1,0.90]]
+  ];
+  const data=vars.map(v=>{
+    const lo=objectiveRecord(v[1]), hi=objectiveRecord(v[2]);
+    return {name:v[0], cost:hi.Cost_vs_S2-lo.Cost_vs_S2, carbon:hi.Carbon_vs_S2-lo.Carbon_vs_S2, time:hi.Time_vs_S2-lo.Time_vs_S2};
+  });
+  chart('sens-chart','bar',{
+    labels:data.map(d=>d.name),
+    datasets:[
+      {label:'Cost swing',data:data.map(d=>d.cost),backgroundColor:'rgba(96,165,250,.65)'},
+      {label:'Carbon swing',data:data.map(d=>d.carbon),backgroundColor:'rgba(52,211,153,.65)'},
+      {label:'Time swing',data:data.map(d=>d.time),backgroundColor:'rgba(251,191,36,.65)'}
+    ]},{
+    plugins:{legend:{display:true,labels:{color:'#94a3b8',font:{family:'JetBrains Mono',size:10}}}},
+    scales:{x:{ticks,grid},y:{ticks,grid,title:{display:true,text:'High bound − low bound (% points)',color:'#94a3b8'}}}
+  });
+  renderImportedSensitivity();
+  renderMonteCarloTable();
+}
+function renderMonteCarloTable(){
+  const table=document.getElementById('mc-table');
+  if(!table) return;
+  if(!importedMonteCarlo || !importedMonteCarlo.length){
+    table.innerHTML='<tbody><tr><td>No Monte Carlo table imported yet.</td></tr></tbody>';
+    return;
+  }
+  const rows=importedMonteCarlo;
+  const baseCols=[
+    'Solution','Solution_ID','Case',
+    'Cost_p50_NZD','Cost_p05_NZD','Cost_p95_NZD',
+    'Carbon_p50_kgCO2e','Carbon_p05_kgCO2e','Carbon_p95_kgCO2e',
+    'Time_p50_hrs','Time_p05_hrs','Time_p95_hrs',
+    'P_cost_better_than_paired_S2_%','P_carbon_better_than_paired_S2_%','P_time_better_than_paired_S2_%',
+    'P_cost_below_official_S2_%','P_carbon_below_official_S2_%','P_time_below_official_S2_%',
+    'Robust_score','Robust_rank'
+  ];
+  const cols=baseCols.filter(c=>rows.some(r=>r[c]!==undefined && r[c]!==null && r[c]!=='')); 
+  table.innerHTML='<thead><tr>'+cols.map(c=>`<th>${escapeHTML(c)}</th>`).join('')+'<th>Risk</th></tr></thead><tbody>'+
+    rows.map(r=>{
+      const risk=mcRiskScore(r);
+      return '<tr>'+cols.map(c=>`<td>${escapeHTML(r[c] ?? '')}</td>`).join('')+`<td>${riskBadge(risk)}</td></tr>`;
+    }).join('')+'</tbody>';
+}
+
+function renderImportedSensitivity(){
+  const table=document.getElementById('sens-table');
+  const chartEl=document.getElementById('imported-sens-chart');
+  if(!table) return;
+  if(!importedSensitivity || !importedSensitivity.length){
+    table.innerHTML='<tbody><tr><td>No imported Python sensitivity table yet.</td></tr></tbody>';
+    if(chartEl) chart('imported-sens-chart','bar',{labels:['No data'],datasets:[{label:'Sensitivity',data:[0],backgroundColor:'rgba(148,163,184,.45)'}]},{plugins:{legend:{display:false}},scales:{x:{ticks,grid},y:{ticks,grid}}});
+    return;
+  }
+  const rows=importedSensitivity;
+  const varKey=['Variable','variable','Input','input','Parameter','parameter'].find(k=>k in rows[0]) || Object.keys(rows[0])[0];
+  const outKey=['Output','output','Objective','objective'].find(k=>k in rows[0]) || null;
+  const coeffKey=['PRCC','Spearman_rho','rho','Correlation','correlation','Sensitivity','sensitivity','Delta_percent','Change_%'].find(k=>k in rows[0]) || Object.keys(rows[0]).find(k=>Number.isFinite(Number(rows[0][k])));
+  const ranked=rows.map(r=>({variable:r[varKey], output:outKey ? r[outKey] : '', coeff:Number(r[coeffKey]), raw:r})).filter(r=>Number.isFinite(r.coeff)).sort((a,b)=>Math.abs(b.coeff)-Math.abs(a.coeff)).slice(0,16);
+  const labels=ranked.map(r=>`${r.variable}${r.output?` → ${r.output}`:''}`);
+  chart('imported-sens-chart','bar',{labels,datasets:[{label:coeffKey,data:ranked.map(r=>r.coeff),backgroundColor:ranked.map(r=>r.coeff<0?'rgba(52,211,153,.65)':'rgba(248,113,113,.65)')}]},{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks,grid,title:{display:true,text:coeffKey,color:'#94a3b8'}},y:{ticks:{...ticks,font:{family:'JetBrains Mono',size:9}},grid}}});
+  const cols=[varKey,outKey,coeffKey,'p_value','P_value','Significance','Rank'].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i && v in rows[0]);
+  table.innerHTML='<thead><tr>'+cols.map(c=>`<th>${escapeHTML(c)}</th>`).join('')+'</tr></thead><tbody>'+ranked.map(rr=>'<tr>'+cols.map(c=>`<td>${escapeHTML(rr.raw[c] ?? '')}</td>`).join('')+'</tr>').join('')+'</tbody>';
+}
+
+
+function updateDecision(){
+  const wc=Number(document.getElementById('w-cost').value), we=Number(document.getElementById('w-carbon').value), wt=Number(document.getElementById('w-time').value);
+  const robustEl=document.getElementById('w-robust');
+  const wr=robustEl ? Number(robustEl.value)/100 : 0;
+  const total=wc+we+wt || 1;
+  const w=[wc/total,we/total,wt/total];
+  document.getElementById('w-cost-val').textContent=w[0].toFixed(2);
+  document.getElementById('w-carbon-val').textContent=w[1].toFixed(2);
+  document.getElementById('w-time-val').textContent=w[2].toFixed(2);
+  if(document.getElementById('w-robust-val')) document.getElementById('w-robust-val').textContent=wr.toFixed(2);
+
+  const rows=getParetoSet().filter(r=>r.Solution_ID!=='S2');
+  let ranked=topsis(rows,w).map(r=>{
+    const mc=lookupMonteCarloForSolution(r.Solution_ID) || lookupMonteCarloForSolution(r.label);
+    const risk=mcRiskScore(mc);
+    const adjustedScore = Number.isFinite(risk) ? r.score - wr*risk : r.score - wr*0.30;
+    return {...r, mc, uncertaintyRisk:risk, adjustedScore};
+  }).sort((a,b)=>b.adjustedScore-a.adjustedScore).slice(0,15);
+
+  if(!ranked.length){
+    document.getElementById('decision-box').textContent='No solutions available.';
+    const rb=document.getElementById('robust-decision-box'); if(rb) rb.textContent='No solutions available.';
+    return;
+  }
+  const best=ranked[0];
+  document.getElementById('decision-box').innerHTML=`<b style="color:var(--carbon)">${escapeHTML(best.label)}</b><br>TOPSIS score: ${best.score.toFixed(4)}<br>Robustness-adjusted score: ${best.adjustedScore.toFixed(4)}<br>${riskBadge(best.uncertaintyRisk)}<br><br>R_p=${best.R_p.toFixed(3)}, R_t=${best.R_t.toFixed(3)}, OC=${best.OC.toFixed(3)}, P_f=${best.P_f.toFixed(3)}<br>Cost: $${fmt0(best.Cost_NZD)} (${pctText(best.Cost_vs_S2)})<br>Carbon: ${fmt0(best.Carbon_kgCO2e)} kgCO₂e (${pctText(best.Carbon_vs_S2)})<br>Time: ${fmt1(best.Time_hours)} hr (${pctText(best.Time_vs_S2)})`;
+
+  const rb=document.getElementById('robust-decision-box');
+  if(rb){
+    if(best.mc){
+      rb.innerHTML=`Monte Carlo evidence linked for <b>${escapeHTML(best.label)}</b>.<br><br>`+
+        `Cost P50: ${escapeHTML(best.mc.Cost_p50_NZD ?? best.mc.cost_p50 ?? '—')} NZD<br>`+
+        `Carbon P50: ${escapeHTML(best.mc.Carbon_p50_kgCO2e ?? best.mc.carbon_p50 ?? '—')} kgCO₂e<br>`+
+        `Time P50: ${escapeHTML(best.mc.Time_p50_hrs ?? best.mc.time_p50 ?? '—')} hr<br><br>`+
+        `Paired-S2 probabilities: cost ${escapeHTML(best.mc['P_cost_better_than_paired_S2_%'] ?? '—')}%, carbon ${escapeHTML(best.mc['P_carbon_better_than_paired_S2_%'] ?? '—')}%, time ${escapeHTML(best.mc['P_time_better_than_paired_S2_%'] ?? '—')}%.<br><br>`+
+        `Interpretation: prefer this solution only if its trade-off remains acceptable under the displayed uncertainty range.`;
+    }else{
+      rb.innerHTML=`Robustness metrics are not linked to <b>${escapeHTML(best.label)}</b>.<br><br>The deterministic TOPSIS ranking is still shown. To enable uncertainty-adjusted interpretation for this option, import a Monte Carlo table containing the same solution label or Solution_ID.`;
+    }
+  }
+
+  const table=document.getElementById('ranking-table');
+  table.innerHTML='<thead><tr><th>Rank</th><th>Solution</th><th>TOPSIS</th><th>Adjusted</th><th>Risk</th><th>R_p</th><th>R_t</th><th>OC</th><th>P_f</th><th>Cost Δ</th><th>Carbon Δ</th><th>Time Δ</th></tr></thead><tbody>'+
+    ranked.map((r,i)=>`<tr><td>${i+1}</td><td>${escapeHTML(r.label)}</td><td>${r.score.toFixed(4)}</td><td>${r.adjustedScore.toFixed(4)}</td><td>${riskBadge(r.uncertaintyRisk)}</td><td>${r.R_p.toFixed(3)}</td><td>${r.R_t.toFixed(3)}</td><td>${r.OC.toFixed(3)}</td><td>${r.P_f.toFixed(3)}</td><td>${pctText(r.Cost_vs_S2)}</td><td>${pctText(r.Carbon_vs_S2)}</td><td>${pctText(r.Time_vs_S2)}</td></tr>`).join('')+'</tbody>';
+}
+function topsis(rows,w){ if(!rows.length) return []; const X=rows.map(r=>[r.Cost_normalized,r.Carbon_normalized,r.Time_normalized]); const denom=[0,1,2].map(j=>Math.sqrt(X.reduce((a,r)=>a+r[j]*r[j],0)) || 1); const V=X.map(r=>r.map((v,j)=>v/denom[j]*w[j])); const best=[0,1,2].map(j=>Math.min(...V.map(r=>r[j]))); const worst=[0,1,2].map(j=>Math.max(...V.map(r=>r[j]))); return rows.map((r,i)=>{ const db=Math.sqrt(V[i].reduce((a,v,j)=>a+Math.pow(v-best[j],2),0)); const dw=Math.sqrt(V[i].reduce((a,v,j)=>a+Math.pow(v-worst[j],2),0)); return {...r,score:dw/(db+dw+1e-12)}; }).sort((a,b)=>b.score-a.score); }
+function renderKeyTable(){ const table=document.getElementById('key-table'); if(!table) return; if(!importedKeyFindings){ table.innerHTML='<tbody><tr><td>No imported key findings are loaded. Import dashboard_config.json to populate this panel.</td></tr></tbody>'; return; } const rows=Object.entries(importedKeyFindings); table.innerHTML='<thead><tr><th>Key</th><th>Value</th></tr></thead><tbody>'+rows.map(([k,v])=>`<tr><td>${k}</td><td>${Array.isArray(v)?v.join(', '):String(v)}</td></tr>`).join('')+'</tbody>'; }
+function renderModelCheck(){ const x=B.x_ref; const rec=objectiveRecord(x); const err=Math.max(Math.abs(rec.Cost_NZD/B.C_S2_reference-1),Math.abs(rec.Carbon_kgCO2e/B.CO2_S2_reference-1),Math.abs(rec.Time_hours/B.Time_S2_reference-1)); document.getElementById('model-check').innerHTML=`S2 check at x_ref [0, 0, 1.00, 0.72]<br>Cost = $${fmt2(rec.Cost_NZD)}<br>Carbon = ${fmt2(rec.Carbon_kgCO2e)} kgCO₂e<br>Time = ${fmt2(rec.Time_hours)} hr<br><br>Consistency error = ${err.toExponential(2)}`; }
+
+// ============================================================================
+// Navigation, import/export and initialization
+// ============================================================================
+function showPage(name){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById('page-'+name).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); const labels={design:'Design Explorer',pareto:'Pareto Explorer',scenario:'Scenario Comparison',sensitivity:'Sensitivity',decision:'Decision Ranking',data:'Data Import'}; document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.includes(labels[name])) n.classList.add('active'); }); renderVisible(); }
+function showTab(id){
+  currentTab = id;
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.tab === id)
+  );
+  document.querySelectorAll('.tabpane').forEach(p =>
+    p.classList.toggle('active', p.id === 'tab-' + id)
+  );
+
+  renderVisible();
+
+  // Canvas dimensions are reliable only after the tab is visible.
+  if(id === 'pparallel'){
+    setTimeout(renderParallel, 80);
+  }
+}
+
+function renderAudit(){
+  const scopeBox=document.getElementById('audit-scope');
+  const filesBox=document.getElementById('audit-files');
+  const vecBox=document.getElementById('audit-vector');
+  const statement=document.getElementById('dashboard-statement');
+  const memo=document.getElementById('memo-box');
+  if(scopeBox){
+    const sc=importedScope || {};
+    const exclusions=Array.isArray(sc.exclusions) ? sc.exclusions.slice(0,8).join('<br>• ') : 'whole-building cost/carbon; structural redesign; consent documentation';
+    scopeBox.innerHTML=
+      `<b>Cost:</b> ${escapeHTML(sc.cost || 'CFS framing process cost only')}<br>`+
+      `<b>Carbon:</b> ${escapeHTML(sc.carbon || 'CFS framing A1–A5 embodied carbon only')}<br>`+
+      `<b>Time:</b> ${escapeHTML(sc.time || 'construction process-hours only')}<br><br>`+
+      `<b>Excluded:</b><br>• ${exclusions}`;
+  }
+  if(filesBox){
+    filesBox.innerHTML = importedOutputStatus().map(([name,count,source])=>{
+      const cls=count>0?'audit-ok':'audit-warn';
+      const txt=count>0?'loaded':'not loaded';
+      return `<span class="audit-badge ${cls}">${escapeHTML(name)}: ${count} ${txt}</span><br><span style="color:var(--muted);font-family:var(--mono);font-size:10px">${escapeHTML(source)}</span><br>`;
+    }).join('');
+  }
+  if(vecBox){
+    vecBox.innerHTML =
+      `<b>x = [R_p, R_t, OC, P_f]</b><br><br>`+
+      `R_p: panel rationalisation intensity, continuous ${JSON.stringify(B.R_p_range)}<br>`+
+      `R_t: truss rationalisation intensity, continuous ${JSON.stringify(B.R_t_range)}<br>`+
+      `OC: opening/detailing complexity ${JSON.stringify(B.opening_complexity_range)}<br>`+
+      `P_f: prefabrication level ${JSON.stringify(B.P_f_range)}<br><br>`+
+      `Reporting categories <code>panel_scheme</code> and <code>truss_scheme</code> are derived from R_p and R_t, not separate optimiser variables.`;
+  }
+  renderValidationRanges();
+  if(memo){
+    const rows=getParetoSet().filter(r=>r.Solution_ID!=='S2');
+    const best=topsis(rows,[1/3,1/3,1/3])[0];
+    if(best){
+      memo.innerHTML =
+        `Under equal objective weighting, the currently preferred nondominated alternative is <b>${escapeHTML(best.label)}</b>. `+
+        `It changes cost by ${pctText(best.Cost_vs_S2)}, carbon by ${pctText(best.Carbon_vs_S2)}, and time by ${pctText(best.Time_vs_S2)} relative to S2. `+
+        `This should be interpreted as a model-based CFS framing configuration recommendation within the stated boundary, not as a tender price or structural design approval.`;
+    }else{
+      memo.textContent='No Pareto solution available for memo generation.';
+    }
+  }
+  if(statement){
+    statement.innerHTML =
+      `Dashboard role: a recalibratable post-processing and interpretation interface for the Python NSGA-II optimisation outputs. `+
+      `It communicates the Pareto trade-off, S2 comparison, component logic, stakeholder ranking, and uncertainty evidence while preserving the declared model boundary. `+
+      `The quantitative results are controlled by imported result tables and JSON configuration, not by manually adjusted screenshots.`;
+  }
+}
+function renderValidationRanges(){
+  const table=document.getElementById('validation-table');
+  if(!table) return;
+  if(!importedValidationRanges){
+    table.innerHTML='<tbody><tr><td>No validation_ranges object loaded yet. Import dashboard_config.json from the current Python run.</td></tr></tbody>';
+    return;
+  }
+  const rows=Object.entries(importedValidationRanges).map(([k,v])=>{
+    const arr=Array.isArray(v)?v:[];
+    return {Parameter:k, Low:arr[0]??'', High:arr[1]??'', Range:Array.isArray(v)?`${arr[0]} – ${arr[1]}`:String(v)};
+  });
+  table.innerHTML='<thead><tr><th>Parameter</th><th>Low</th><th>High</th><th>Use</th></tr></thead><tbody>'+
+    rows.map(r=>`<tr><td>${escapeHTML(r.Parameter)}</td><td>${escapeHTML(r.Low)}</td><td>${escapeHTML(r.High)}</td><td>${parameterUseText(r.Parameter)}</td></tr>`).join('')+'</tbody>';
+}
+function parameterUseText(k){
+  if(k.includes('nzd') || k.includes('cost') || k.includes('labor') || k.includes('transport_cost')) return 'cost uncertainty';
+  if(k.includes('carbon') || k.includes('kgco2e') || k.includes('freight')) return 'carbon uncertainty';
+  if(k.includes('time') || k.includes('weather')) return 'time uncertainty';
+  if(k.includes('prefab') || k.includes('opening') || k.includes('logistics')) return 'interaction coefficient';
+  return 'model parameter';
+}
+function exportPractitionerMemo(){
+  const rows=getParetoSet().filter(r=>r.Solution_ID!=='S2');
+  const ranked=topsis(rows,[1/3,1/3,1/3]);
+  const best=ranked[0];
+  if(!best) return;
+  const memo=[
+    'CFS optimisation dashboard decision memo',
+    '----------------------------------------',
+    `Selected solution: ${best.label}`,
+    `Decision vector: R_p=${best.R_p.toFixed(4)}, R_t=${best.R_t.toFixed(4)}, OC=${best.OC.toFixed(4)}, P_f=${best.P_f.toFixed(4)}`,
+    `Cost: NZD ${best.Cost_NZD.toFixed(2)} (${pctText(best.Cost_vs_S2)} vs S2)`,
+    `Carbon: ${best.Carbon_kgCO2e.toFixed(2)} kgCO2e (${pctText(best.Carbon_vs_S2)} vs S2)`,
+    `Time: ${best.Time_hours.toFixed(2)} hr (${pctText(best.Time_vs_S2)} vs S2)`,
+    '',
+    'Scope warning: CFS framing process cost, A1-A5 framing carbon, and process-hours only. Not structural approval, tender pricing, or calendar scheduling.'
+  ].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(memo);
+  a.download='cfs_dashboard_decision_memo.txt';
+  a.click();
+}
+
+
+function renderVisible(){ if(document.getElementById('page-pareto').classList.contains('active')){ if(currentTab==='p2d') renderParetoCharts(); if(currentTab==='ptable') renderRepTable(); if(currentTab==='pparallel') renderParallel(); } if(document.getElementById('page-scenario').classList.contains('active')) renderScenarios(); if(document.getElementById('page-sensitivity').classList.contains('active')) renderSensitivity(); if(document.getElementById('page-decision').classList.contains('active')) updateDecision(); if(document.getElementById('page-audit').classList.contains('active')) renderAudit(); if(document.getElementById('page-data').classList.contains('active')){ renderModelCheck(); renderKeyTable(); } }
+function resetDesign(){ state={R_p:0,R_t:0,OC:1.00,P_f:0.72}; writeSliders(); updateAll(); }
+function resetAll(){ B=deepClone(DEFAULT_B); importedPareto=null; importedRepresentatives=null; importedMonteCarlo=null; importedTopsis=null; importedSensitivity=null; importedValidationRanges=null; importedScope=null; importedProject=null; importedValidationNotes=null; importedHypervolume=null; importedComponentBreakdowns={}; importedKeyFindings=null; usingImported=false; initialiseScenarioControlsFromCurrentB(); resetDesign(); const st=document.getElementById('import-status'); if(st) st.textContent='No external JSON imported. The dashboard is using the embedded current Python-equation surrogate.'; const cs=document.getElementById('csv-status'); if(cs) cs.textContent='No CSV bundle imported yet.'; }
+function copyCurrentJSON(){ const rec=objectiveRecord(currentX()); const out={design_vector:{R_p_panel_rationalisation:state.R_p,R_t_truss_rationalisation:state.R_t,opening_complexity_index:state.OC,P_f_prefab_level:state.P_f},objectives:{Cost_NZD:rec.Cost_NZD,Carbon_kgCO2e:rec.Carbon_kgCO2e,Time_hours:rec.Time_hours},vs_S2_percent:{Cost:rec.Cost_vs_S2,Carbon:rec.Carbon_vs_S2,Time:rec.Time_vs_S2}}; navigator.clipboard.writeText(JSON.stringify(out,null,2)); }
+function downloadCurrentCSV(){ const r=objectiveRecord(currentX()); const rows=[['Field','Value'],['R_p_panel_rationalisation',state.R_p],['R_t_truss_rationalisation',state.R_t],['opening_complexity_index',state.OC],['P_f_prefab_level',state.P_f],['panel_scheme_reporting',r.panel_scheme],['truss_scheme_reporting',r.truss_scheme],['Cost_NZD',r.Cost_NZD],['Carbon_kgCO2e',r.Carbon_kgCO2e],['Time_hours',r.Time_hours],['Cost_vs_S2_%',r.Cost_vs_S2],['Carbon_vs_S2_%',r.Carbon_vs_S2],['Time_vs_S2_%',r.Time_vs_S2]]; const csv=rows.map(r=>r.join(',')).join('\n'); const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='cfs_dashboard_current_design.csv'; a.click(); }
+function applyConfig(data, name='dashboard_config.json'){
+  // Baseline geometry/quantity metadata
+  if(data.baseline){
+    if(Number.isFinite(Number(data.baseline.steel_weight_kg))) B.W_base = Number(data.baseline.steel_weight_kg);
+    if(Number.isFinite(Number(data.baseline.footprint_m2))) B.footprint_area_m2 = Number(data.baseline.footprint_m2);
+    if(Number.isFinite(Number(data.baseline.envelope_m2))) B.envelope_area_m2 = Number(data.baseline.envelope_m2);
+    if(Number.isFinite(Number(data.baseline.num_wall_panels))) B.num_wall_panels = Number(data.baseline.num_wall_panels);
+    if(Number.isFinite(Number(data.baseline.num_roof_trusses))) B.num_roof_trusses = Number(data.baseline.num_roof_trusses);
+
+    if(Number.isFinite(Number(data.baseline.prefab_level))) B.x_ref[3] = Number(data.baseline.prefab_level);
+    if(Number.isFinite(Number(data.baseline.opening_complexity_index))) B.x_ref[2] = Number(data.baseline.opening_complexity_index);
+  }
+
+  // Variable ranges exported by Python, if present
+  if(data.design_variables){
+    const dv = data.design_variables;
+    if(dv.R_p_panel_rationalisation?.range) B.R_p_range = dv.R_p_panel_rationalisation.range.map(Number);
+    if(dv.R_t_truss_rationalisation?.range) B.R_t_range = dv.R_t_truss_rationalisation.range.map(Number);
+    if(dv.opening_complexity_index?.range) B.opening_complexity_range = dv.opening_complexity_index.range.map(Number);
+    if(dv.P_f_prefab_level?.range) B.P_f_range = dv.P_f_prefab_level.range.map(Number);
+    if(Number.isFinite(Number(dv.R_p_panel_rationalisation?.s2_value))) B.x_ref[0] = Number(dv.R_p_panel_rationalisation.s2_value);
+    if(Number.isFinite(Number(dv.R_t_truss_rationalisation?.s2_value))) B.x_ref[1] = Number(dv.R_t_truss_rationalisation.s2_value);
+    if(Number.isFinite(Number(dv.opening_complexity_index?.s2_value))) B.x_ref[2] = Number(dv.opening_complexity_index.s2_value);
+    if(Number.isFinite(Number(dv.P_f_prefab_level?.s2_value))) B.x_ref[3] = Number(dv.P_f_prefab_level.s2_value);
+  }
+
+  // Calibration/equation coefficients. This dashboard accepts old and new keys.
+  const cal = Object.assign(
+    {},
+    data.recalibration_defaults || {},
+    data.calibration || {},
+    data.model_coefficients || {},
+    data.equation_coefficients || {}
+  );
+
+  for(const [k,v] of Object.entries(cal)){
+    if(k in B && Number.isFinite(Number(v))){
+      B[k] = Number(v);
+    }
+  }
+
+  if(Number.isFinite(Number(cal.transport_distance_km))){
+    B.a4_default_transport_distance_km = Number(cal.transport_distance_km);
+  }
+
+  // Imported optimisation outputs are the authoritative dashboard inputs.
+  importedPareto = Array.isArray(data.pareto) ? data.pareto : null;
+  importedRepresentatives = Array.isArray(data.representatives) ? data.representatives : null;
+  importedMonteCarlo = Array.isArray(data.monte_carlo) ? data.monte_carlo : null;
+  importedTopsis = Array.isArray(data.topsis) ? data.topsis : null;
+  importedSensitivity = Array.isArray(data.sensitivity) ? data.sensitivity : null;
+  importedValidationRanges = data.validation_ranges || null;
+  importedScope = data.scope || null;
+  importedProject = data.project || null;
+  importedKeyFindings = data.key_findings || null;
+  usingImported = !!(importedPareto && importedPareto.length);
+
+  recomputeReferences();
+
+  // Use official imported S2 values for dashboard badges/normalisation if supplied.
+  // If the embedded equations and Python equations match, the model-check error will be ~0.
+  if(data.baseline){
+    if(Number.isFinite(Number(data.baseline.cost_nzd))) B.C_S2_reference = Number(data.baseline.cost_nzd);
+    if(Number.isFinite(Number(data.baseline.carbon_kgco2e))) B.CO2_S2_reference = Number(data.baseline.carbon_kgco2e);
+    if(Number.isFinite(Number(data.baseline.time_hours))) B.Time_S2_reference = Number(data.baseline.time_hours);
+  }
+
+  initialiseScenarioControlsFromCurrentB();
+
+  updateAll();
+
+  const st = document.getElementById('import-status');
+  if(st){
+    st.innerHTML =
+      `Loaded <b>${name}</b>.<br>` +
+      `Pareto rows: ${importedPareto ? importedPareto.length : 0}; ` +
+      `representatives: ${importedRepresentatives ? importedRepresentatives.length : 0}; ` +
+      `Monte Carlo rows: ${importedMonteCarlo ? importedMonteCarlo.length : 0}; ` +
+      `sensitivity rows: ${importedSensitivity ? importedSensitivity.length : 0}; ` +
+      `TOPSIS rows: ${importedTopsis ? importedTopsis.length : 0}.`;
+  }
+}
+
+function importConfig(event){ const file=event.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=e=>{ try{ applyConfig(JSON.parse(e.target.result),file.name); }catch(err){ document.getElementById('import-status').textContent='Import failed: '+err.message; } }; reader.readAsText(file); }
+async function fetchTextNoCache(url){
+  const r = await fetch(url + '?v=' + Date.now(), { cache: 'no-store' });
+  if(!r.ok){
+    throw new Error(`${url} not found, HTTP ${r.status}`);
+  }
+  return await r.text();
+}
+
+async function fetchJsonNoCache(url){
+  const txt = await fetchTextNoCache(url);
+  return JSON.parse(txt);
+}
+
+async function fetchCsvNoCache(url){
+  const txt = await fetchTextNoCache(url);
+
+  const parsed = Papa.parse(txt, {
+    header: true,
+    dynamicTyping: true,
+    skipEmptyLines: true
+  });
+
+  if(parsed.errors && parsed.errors.length){
+    console.warn('[CSV parse warning]', url, parsed.errors);
+  }
+
+  return parsed.data;
+}
+
+async function loadLatestPythonDashboardBundle(){
+  try{
+    // 1. Load metadata/baseline/scope first.
+    try{
+      const config = await fetchJsonNoCache('data/dashboard_config.json');
+      applyConfig(config, 'data/dashboard_config.json');
+    }catch(configErr){
+      console.warn('[DASHBOARD] dashboard_config.json not loaded:', configErr.message);
+    }
+
+    // 2. Load latest manifest.
+    const manifest = await fetchJsonNoCache('data/latest_manifest.json');
+    const files = manifest.files || {};
+
+    async function loadTable(key){
+      if(!files[key] || !files[key].filename){
+        console.warn(`[DASHBOARD] Missing latest table: ${key}`);
+        return [];
+      }
+
+      const url = 'data/' + files[key].filename;
+      const rows = await fetchCsvNoCache(url);
+
+      console.log(`[DASHBOARD] Loaded ${key}: ${rows.length} rows from ${url}`);
+      return rows;
+    }
+
+    // 3. These replace dashboard_config truncated JSON records.
+    importedPareto = await loadTable('pareto_front');
+    importedRepresentatives = await loadTable('representative_solutions');
+    importedMonteCarlo = await loadTable('monte_carlo_robustness');
+    importedTopsis = await loadTable('topsis_stakeholder_ranking');
+
+    const prcc = await loadTable('lhs_prcc_sensitivity');
+    const spearman = await loadTable('lhs_spearman_sensitivity');
+    const oat = await loadTable('sensitivity_oat');
+    importedSensitivity = prcc.length ? prcc : (spearman.length ? spearman : oat);
+
+    importedHypervolume = await loadTable('hypervolume_progress');
+
+    importedComponentBreakdowns = {
+      cost: await loadTable('component_breakdown_cost'),
+      carbon: await loadTable('component_breakdown_carbon'),
+      time: await loadTable('component_breakdown_time')
+    };
+
+    usingImported = !!(importedPareto && importedPareto.length);
+
+    updateAll();
+    renderVisible();
+
+    const st = document.getElementById('import-status');
+    if(st){
+      st.innerHTML =
+        `<b>Latest Python output loaded.</b><br>` +
+        `Run timestamp: ${manifest.run_timestamp}<br>` +
+        `Pareto rows: ${importedPareto.length}<br>` +
+        `Representative rows: ${importedRepresentatives.length}<br>` +
+        `Monte Carlo rows: ${importedMonteCarlo.length}`;
+    }
+
+    console.log('[DASHBOARD] latest_manifest.json loaded:', manifest);
+    console.log('[DASHBOARD] Pareto rows:', importedPareto.length);
+
+    return true;
+
+  }catch(err){
+    console.error('[DASHBOARD] Latest Python bundle not loaded:', err);
+
+    // Fallback: load dashboard_config.json only.
+    try{
+      const data = await fetchJsonNoCache('data/dashboard_config.json');
+      applyConfig(data, 'data/dashboard_config.json');
+      return false;
+    }catch(configErr){
+      console.warn('[DASHBOARD] No dashboard_config.json fallback:', configErr.message);
+      return false;
+    }
+  }
+}
+
+recomputeReferences();
+initialiseScenarioControlsFromCurrentB();
+writeSliders();
+updateAll();
+
+window.addEventListener('DOMContentLoaded', async function(){
+  await loadLatestPythonDashboardBundle();
+});
+</script>
+</body>
+</html>

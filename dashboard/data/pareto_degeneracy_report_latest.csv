@@ -1,0 +1,9 @@
+Variable,Unique_values_on_Pareto,Min,Max,Mean,Status
+R_p_panel_rationalisation,337,0.6733,0.7555,0.6915,Active variation on Pareto front
+R_t_truss_rationalisation,339,0.6582,0.7265,0.6817,Active variation on Pareto front
+panel_scheme,2,2.0,3.0,2.0005,Active variation on Pareto front
+truss_scheme,1,2.0,2.0,2.0,Collapsed / constant on Pareto front
+opening_complexity_index,181,0.8,1.0,0.9861,Active variation on Pareto front
+P_f_prefab_level,1598,0.7083,0.9,0.8329,Active variation on Pareto front
+N_panel_classes,108,2.489,2.653,2.617,Active variation on Pareto front
+N_truss_types,151,14.82,15.025,14.955,Active variation on Pareto front
