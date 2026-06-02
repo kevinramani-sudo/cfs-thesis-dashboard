@@ -1,0 +1,8 @@
+Input_or_configuration_source,Active_values_taken_from,Content,Model_use,Legacy_CSV_dependency,Output_evidence
+CFSProjectBaseline,Python model configuration,"Project geometry, panel/truss quantities, baseline steel mass, and S2 reference vector",Fixed CFS framing case-study boundary,None,active_input_inventory_20260529_150737.csv
+CFSProjectBaseline,Python model configuration,Cost coefficients and uncertainty ranges,CFS framing process cost and Monte Carlo uncertainty,None,calibration_audit_20260529_150737.csv
+CFSProjectBaseline,Python model configuration,Carbon coefficients and uncertainty ranges,CFS framing A1-A5 carbon and Monte Carlo uncertainty,None,calibration_audit_20260529_150737.csv
+CFSProjectBaseline,Python model configuration,"Factory, logistics, site installation, mobilisation, and weather time parameters",CFS framing process-hours and robustness analysis,None,calibration_audit_20260529_150737.csv
+CFSProjectBaseline,Python model configuration,"Decision-variable ranges for R_p, R_t, OC, and P_f",NSGA-II search space and LHS sampling bounds,None,design_variable_table_20260529_150737.csv
+CFSObjectiveFunctions,Objective-function engine,"Cost, carbon, time, material-weight, feasibility, and component-breakdown calculations","Objective evaluation, Pareto-front extraction, and dashboard outputs",None,pareto_front_20260529_150737.csv
+CFSObjectiveFunctions reporting mappings,Current mapping functions,Derived panel_scheme and truss_scheme labels from continuous R_p and R_t,"Tables, plots, and dashboard filtering",None,pareto_front_20260529_150737.csv

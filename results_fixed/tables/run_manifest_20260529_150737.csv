@@ -1,0 +1,19 @@
+Field,Value
+Run_timestamp,20260529_150737
+Run_mode,final
+Initialisation_method,lhs
+Main_seed,42
+Population_size,200
+Generations,300
+Hypervolume_samples,500000
+Hypervolume_frequency,10
+Grid_reference_step,0.05
+Monte_Carlo_enabled,True
+Monte_Carlo_runs,1000
+Multi_seed_enabled,True
+Multi_seed_set,"(11, 22, 33, 44, 55)"
+LHS_global_sensitivity_enabled,True
+LHS_sensitivity_samples,2000
+Tables_output_folder,C:\Users\kr454\multi objective\cfs_thesis\results_fixed\tables
+Figures_output_folder,C:\Users\kr454\multi objective\cfs_thesis\results_fixed\figures
+Dashboard_data_folder,C:\Users\kr454\multi objective\cfs_thesis\dashboard\data

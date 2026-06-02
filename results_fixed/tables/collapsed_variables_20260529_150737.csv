@@ -1,0 +1,2 @@
+Variable,Type,Unique_values_on_front,Min_on_front,Max_on_front,Range_on_front,Status,Thesis_finding,Practitioner_action
+truss_scheme,discrete,1,2.0,2.0,0.0,Pareto-collapsed: universal optimum,"One truss scheme dominates the Pareto front. If this is scheme 0, aggressive truss span reduction does not provide enough benefit to offset grouping/oversizing/setup penalties for this building.",Fix truss_scheme at the Pareto-selected value.

@@ -1,0 +1,6 @@
+Solution,R_p_panel_rationalisation,R_t_truss_rationalisation,panel_scheme,truss_scheme,opening_complexity_index,P_f_prefab_level,T_factory_production,T_factory_setup,T_delivery_logistics,T_site_mobilisation,T_site_installation,T_weather,T_total,Total_time_hours,Time_vs_S2_%
+Cost-min,0.6895,0.6785,2,2,1.0,0.7083,40.4,2.69,2.13,3.0,39.84,2.39,90.45,90.45,-3.69
+Carbon-min,0.6895,0.6811,2,2,1.0,0.9,55.99,2.69,2.28,3.0,35.58,2.13,101.67,101.67,8.25
+Time-min,0.7529,0.7217,3,2,0.8,0.7825,42.44,2.64,2.18,3.0,35.19,2.11,87.57,87.57,-6.76
+Knee/balanced,0.6907,0.6799,2,2,1.0,0.8184,44.27,2.69,2.2,3.0,35.65,2.14,89.94,89.94,-4.24
+S2 reference,0.0,0.0,0,0,1.0,0.72,41.43,3.5,2.06,3.0,41.45,2.49,93.92,93.92,-0.0

@@ -1,0 +1,9 @@
+Reference_item,Value,Unit,Source_in_current_code,Model_use
+S2 design vector,"[0.0, 0.0, 1.0, 0.72]",dimensionless / fraction,baseline.x_ref,Reference configuration for normalisation and comparison
+S2 CFS framing process cost,18335.47,NZD,obj_func.calculate_cost_abs(baseline.x_ref),Cost denominator for normalisation and S2 percentage comparison
+S2 CFS framing A1-A5 carbon,5366.79,kgCO2e,obj_func.calculate_carbon_abs(baseline.x_ref),Carbon denominator for normalisation and S2 percentage comparison
+S2 CFS framing process-hours,93.92,h,obj_func.calculate_time_abs(baseline.x_ref),Time denominator for normalisation and S2 percentage comparison
+S2 data status,"model-calculated CFS framing reference, not measured commercial data",-,baseline.S2_reference_data_status,Scope and limitation statement
+S2 cost scope,CFS framing process cost: steel material + factory processing + site installation labour + setup + transport + delivery/logistics + mobilisation + waste handling + overhead.,-,baseline.S2_cost_scope,Cost boundary statement
+S2 carbon scope,CFS framing carbon: A1-A3 steel + A4 transport + factory energy + A5 site installation + waste allowance. Whole-building carbon is outside scope.,-,baseline.S2_carbon_scope,Carbon boundary statement
+S2 time scope,Total construction process hours: factory production + setup + delivery/logistics + site installation + site mobilisation. Not calendar duration.,-,baseline.S2_time_scope,Time boundary statement

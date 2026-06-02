@@ -1,0 +1,7 @@
+Metric,Value,Meaning
+Total evaluated fitness calls,47549,"All candidate designs evaluated by NSGA-II, including repeated offspring evaluations."
+Hard-feasible evaluated candidates,47549,Evaluated candidates satisfying hard NZ constructability constraints.
+Hard-infeasible evaluated candidates,0,Evaluated candidates violating at least one hard constraint.
+External nondominated archive size,8302,DEAP ParetoFront archive returned by the optimizer.
+Final analysed nondominated Pareto solutions,8302,Finite nondominated solutions after physical-objective filtering.
+Representative selected solutions,5,"Selected solutions such as Min Cost, Min Carbon, Min Time, Balanced, etc."

@@ -1,0 +1,13 @@
+Variable,Objective,Variable_type,Low_case_%Y,High_case_%Y,Low_case_elasticity,High_case_elasticity
+R_p_panel_rationalisation,cost,continuous rationalisation variable; reference value is zero so elasticity not computed,0.0,0.913,,
+R_p_panel_rationalisation,carbon,continuous rationalisation variable; reference value is zero so elasticity not computed,0.0,0.648,,
+R_p_panel_rationalisation,time,continuous rationalisation variable; reference value is zero so elasticity not computed,0.0,-1.558,,
+R_t_truss_rationalisation,cost,continuous rationalisation variable; reference value is zero so elasticity not computed,0.0,1.041,,
+R_t_truss_rationalisation,carbon,continuous rationalisation variable; reference value is zero so elasticity not computed,0.0,0.678,,
+R_t_truss_rationalisation,time,continuous rationalisation variable; reference value is zero so elasticity not computed,0.0,-0.571,,
+opening_complexity_index,cost,continuous/index elasticity,0.696,17.256,-0.035,0.575
+opening_complexity_index,carbon,continuous/index elasticity,0.402,2.802,-0.02,0.093
+opening_complexity_index,time,continuous/index elasticity,-1.129,11.062,0.056,0.369
+P_f_prefab_level,cost,continuous/index elasticity,5.505,17.287,-0.18,0.691
+P_f_prefab_level,carbon,continuous/index elasticity,4.084,-1.409,-0.134,-0.056
+P_f_prefab_level,time,continuous/index elasticity,32.191,11.898,-1.054,0.476

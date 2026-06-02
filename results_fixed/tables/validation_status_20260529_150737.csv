@@ -1,0 +1,9 @@
+Item,Status,Required_wording,Where_to_use
+S2 reference values,Model-calculated reference,Model-calculated reference; not a measured commercial benchmark.,"All thesis tables, figure captions, dashboard baseline cards."
+k-values,Calibrated scenario parameters,"Interaction coefficients are calibrated scenario parameters tested through uncertainty analysis, not directly measured constants.","Chapter 3 methodology, calibration audit table, Chapter 6 limitations."
+Opening complexity index,Design-of-experiments variable,"OC represents standardisation of lintels, jambs, service penetrations and trimming details; it does not change the number of architectural openings.","Design-variable table, methodology, dashboard tooltip."
+Time objective,Process-hours only,"Construction time is reported as aggregated CFS framing process-hours, not calendar duration.","Objective definition, all plots, dashboard labels."
+Carbon objective,CFS framing A1-A5 only,Carbon includes CFS framing A1-A5 only and excludes operational and whole-building carbon.,"Objective definition, figures, dashboard labels."
+Building geometry,Fixed,"The optimisation does not vary footprint area, envelope area, wall-panel count, roof-truss count, or building layout.",Section 4.2 and fixed boundary table.
+Structural member sizing,Not optimised,"The framework does not perform live AS/NZS 4600 member sizing, connection design, bracing design, or consent-level structural verification.",Methodology boundary and limitations.
+Contractor tender benchmark,Outside scope,"The model reports CFS framing process cost, not a contractor tender price or whole-house construction cost.",Cost objective and limitations.

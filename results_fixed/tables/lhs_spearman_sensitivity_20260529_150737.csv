@@ -1,0 +1,13 @@
+Output,Variable,Spearman_rho,Abs_Spearman_rho
+Carbon_kgCO2e,P_f_prefab_level,-0.8426275386568847,0.8426275386568847
+Carbon_kgCO2e,opening_complexity_index,0.4238979474744869,0.4238979474744869
+Carbon_kgCO2e,R_p_panel_rationalisation,-0.041019895254973814,0.041019895254973814
+Carbon_kgCO2e,R_t_truss_rationalisation,0.03720039780009945,0.03720039780009945
+Cost_NZD,opening_complexity_index,0.7572623148155787,0.7572623148155787
+Cost_NZD,P_f_prefab_level,0.1520012780003195,0.1520012780003195
+Cost_NZD,R_t_truss_rationalisation,0.07305012626253156,0.07305012626253156
+Cost_NZD,R_p_panel_rationalisation,-0.017305382826345708,0.017305382826345708
+Time_hours,P_f_prefab_level,-0.589862779965695,0.589862779965695
+Time_hours,opening_complexity_index,0.44826909106727275,0.44826909106727275
+Time_hours,R_p_panel_rationalisation,-0.12196389499097375,0.12196389499097375
+Time_hours,R_t_truss_rationalisation,-0.008235965058991265,0.008235965058991265

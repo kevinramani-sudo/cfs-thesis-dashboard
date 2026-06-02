@@ -1,0 +1,6 @@
+Solution,R_p_panel_rationalisation,R_t_truss_rationalisation,panel_scheme,truss_scheme,opening_complexity_index,P_f_prefab_level,CO2_A1_A3_steel,CO2_waste,CO2_A4_transport,CO2_factory_energy,CO2_A5_installation,CO2_total,Total_carbon_kgCO2e,Carbon_vs_S2_%
+Cost-min,0.6895,0.6785,2,2,1.0,0.7083,4551.62,198.13,36.77,16.16,506.42,5309.09,5309.09,-1.08
+Carbon-min,0.6895,0.6811,2,2,1.0,0.9,4526.72,189.43,37.3,22.39,451.89,5227.74,5227.74,-2.59
+Time-min,0.7529,0.7217,3,2,0.8,0.7825,4565.56,194.5,37.2,16.98,480.15,5294.4,5294.4,-1.35
+Knee/balanced,0.6907,0.6799,2,2,1.0,0.8184,4538.01,192.18,37.03,17.71,468.13,5253.04,5253.04,-2.12
+S2 reference,0.0,0.0,0,0,1.0,0.72,4610.05,202.92,36.14,16.57,501.11,5366.79,5366.79,-0.0

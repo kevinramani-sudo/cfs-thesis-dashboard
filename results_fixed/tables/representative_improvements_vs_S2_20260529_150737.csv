@@ -1,0 +1,6 @@
+Case,Solution_ID,Cost_vs_S2_%,Carbon_vs_S2_%,Time_vs_S2_%,All_3_better_than_S2,Any_objective_better_than_S2,Comment
+Cost-min,P1,-1.61,-1.08,-3.7,True,True,Pareto-improving vs S2
+Carbon-min,P8292,15.58,-2.59,8.25,False,True,Trade-off vs S2
+Time-min,P2304,-0.5,-1.35,-6.76,True,True,Pareto-improving vs S2
+Knee/balanced,P3002,0.6,-2.12,-4.23,False,True,Trade-off vs S2
+S2 reference,S2,0.0,0.0,0.0,True,False,Pareto-improving vs S2

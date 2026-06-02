@@ -1,0 +1,4 @@
+Scenario,R_p_panel_rationalisation,R_t_truss_rationalisation,panel_scheme,truss_scheme,opening_complexity_index,N_openings_reference,P_f_prefab_level,Cost_NZD_raw,Carbon_kgCO2e_raw,Time_hours_raw,Cost_vs_S2_%,Carbon_vs_S2_%,Time_vs_S2_%
+S1_low_prefab,0.0,0.0,0,0,1.0,12,0.5,19344.84,5585.99,124.15,5.5,4.08,32.19
+S2_medium_prefab_reference,0.0,0.0,0,0,1.0,12,0.72,18335.47,5366.79,93.92,0.0,0.0,0.0
+S3_high_prefab,0.0,0.0,0,0,1.0,12,0.9,21505.16,5291.2,105.09,17.29,-1.41,11.9

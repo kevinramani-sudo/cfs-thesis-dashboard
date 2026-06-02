@@ -1,0 +1,22 @@
+Metric,Value
+Pareto solutions,8302.0
+Hard-feasible solutions,8302.0
+Hard-infeasible solutions,0.0
+Max_panel_width_m_min,1.8
+Max_panel_width_m_max,1.8
+Panel_height_m_min,2.7
+Panel_height_m_max,2.7
+Stud_spacing_mm_min,600.0
+Stud_spacing_mm_max,600.0
+Steel_thickness_mm_min,0.75
+Steel_thickness_mm_max,0.75
+Panel_lift_mass_kg_min,32.33
+Panel_lift_mass_kg_max,32.61
+Factory_repetition_score_min,0.754
+Factory_repetition_score_max,0.758
+Carbon_intensity_kgCO2e_m2_min,53.186
+Carbon_intensity_kgCO2e_m2_max,54.013
+Total_constraint_penalty_min,0.0
+Total_constraint_penalty_max,0.0
+Hard violation pattern: None,8302.0
+Soft violation pattern: None,8302.0

@@ -1,0 +1,24 @@
+Boundary_item,Value,Unit,Status_in_model,Output_evidence
+Case-study type,Single-storey CFS residential framing case,-,Fixed,fixed_boundary_conditions_20260529_150737.csv
+Footprint area,98.292,m2,Fixed,fixed_boundary_conditions_20260529_150737.csv
+Envelope area,217.2555,m2,Fixed,fixed_boundary_conditions_20260529_150737.csv
+Total wall panels,48,count,Fixed,fixed_boundary_conditions_20260529_150737.csv
+Total roof trusses,58,count,Fixed,fixed_boundary_conditions_20260529_150737.csv
+Baseline steel mass,2195.264,kg,Fixed reference quantity,fixed_boundary_conditions_20260529_150737.csv
+CFS section source,F325iT - Imported Section,-,Fixed,fixed_boundary_conditions_20260529_150737.csv
+CFS section designation,89 S 41,-,Fixed,fixed_boundary_conditions_20260529_150737.csv
+Steel thickness,0.75,mm,Fixed; not optimised,fixed_boundary_conditions_20260529_150737.csv
+Steel grade,G500,-,Fixed,fixed_boundary_conditions_20260529_150737.csv
+Coating class,Z275,-,Fixed,fixed_boundary_conditions_20260529_150737.csv
+Panel height,2.7,m,Fixed project boundary condition,fixed_boundary_conditions_20260529_150737.csv
+Stud spacing,600.0,mm,Fixed project boundary condition,fixed_boundary_conditions_20260529_150737.csv
+Maximum panel width,2.4,m,Hard feasibility constraint,fixed_boundary_conditions_20260529_150737.csv
+Maximum lift mass,2000.0,kg,Hard feasibility constraint,fixed_boundary_conditions_20260529_150737.csv
+S2 reference vector,"[0.0, 0.0, 1.0, 0.72]",dimensionless / fraction,Reference design vector,s2_reference_values_20260529_150737.csv
+S2 CFS framing process cost,18335.47,NZD,Model-calculated reference objective,s2_reference_values_20260529_150737.csv
+S2 CFS framing A1-A5 carbon,5366.79,kgCO2e,Model-calculated reference objective,s2_reference_values_20260529_150737.csv
+S2 CFS framing process-hours,93.92,h,Model-calculated reference objective,s2_reference_values_20260529_150737.csv
+Optimised building geometry,Not varied,-,Excluded from optimisation,validation_status_20260529_150737.csv
+Structural member sizing,Not varied,-,Excluded from optimisation,validation_status_20260529_150737.csv
+Whole-building LCA scope,Not included,-,Outside model boundary,validation_status_20260529_150737.csv
+Contractor tender benchmarking,Not included,-,Outside model boundary,validation_status_20260529_150737.csv

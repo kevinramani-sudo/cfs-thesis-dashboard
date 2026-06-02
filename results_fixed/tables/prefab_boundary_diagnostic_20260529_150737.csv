@@ -1,0 +1,2 @@
+Variable,Lower_bound,Upper_bound,Min_on_Pareto,Max_on_Pareto,Mean_on_Pareto,Percent_at_lower_bound,Percent_at_upper_bound,Interpretation
+P_f_prefab_level,0.5,0.9,0.7083,0.9,0.8329408817152493,0.0,0.1927246446639364,"If most solutions are at the upper bound, prefabrication may be too dominant. If solutions spread across the range, P_f is acting as a trade-off variable."

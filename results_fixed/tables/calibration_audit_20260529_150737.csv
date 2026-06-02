@@ -1,0 +1,29 @@
+parameter,value,unit,range,source_basis,validation_status,model_use
+C_S2_reference,18335.47230387193,NZD,Not applicable,Model-calculated CFS framing process-cost reference,Calculated from current objective-function engine,S2 benchmark for normalisation and comparison
+CO2_S2_reference,5366.794267889385,kgCO2e,Not applicable,Model-calculated CFS framing A1-A5 carbon reference,Calculated from current objective-function engine,S2 benchmark for normalisation and comparison
+Time_S2_reference,93.92021530656349,process-hours,Not applicable,Model-calculated CFS framing process-hour reference,Calculated from current objective-function engine,S2 benchmark for normalisation and comparison
+footprint_area_m2,98.292,m2,Not applicable,Current code-defined case-study geometry,Model configuration value,Fixed CFS framing boundary
+envelope_area_m2,217.2555,m2,Not applicable,Current code-defined envelope/framing area,Model configuration value,A5 carbon and reporting normalisation
+num_wall_panels,48,count,Not applicable,Current code-defined case-study panel quantity,Model configuration value,Panel rationalisation and constructability metrics
+num_roof_trusses,58,count,Not applicable,Current code-defined case-study truss quantity,Model configuration value,Truss rationalisation and constructability metrics
+W_base,2195.264,kg,Not applicable,Current code-defined baseline CFS steel mass,Model configuration value,Material cost and A1-A3 steel carbon
+raw_steel_material_nzd_per_kg,2.4,NZD/kg,"(2.0, 2.65)",Current code-defined market-rate assumption,Uncertainty-tested parameter,CFS framing process cost
+factory_processing_nzd_per_kg,2.8,NZD/kg,"(2.2, 3.8)",Current code-defined factory processing assumption,Uncertainty-tested parameter,CFS framing process cost
+site_labor_rate_nzd_per_hr,48.0,NZD/h,"(42.0, 58.0)",Current code-defined labour-rate assumption,Uncertainty-tested parameter,CFS framing process cost and process-hours coupling
+transport_cost_nzd_per_tonne_km,3.0,NZD/t-km,"(2.4, 4.2)",Current code-defined freight cost assumption,Uncertainty-tested parameter,Transport cost
+steel_carbon_factor_a1_a3_kgco2e_per_kg,2.1,kgCO2e/kg,"(1.5, 2.89)",Current code-defined A1-A3 steel carbon factor,Uncertainty-tested parameter,CFS framing A1-A5 carbon
+freight_kgco2e_per_tonne_km,0.135,kgCO2e/t-km,"(0.107, 0.155)",Current code-defined A4 freight carbon factor,Uncertainty-tested parameter,A4 transport carbon
+a5_installation_carbon_kgco2e_per_m2,3.2,kgCO2e/m2,"(1.5, 4.5)",Current code-defined A5 installation carbon factor,Uncertainty-tested parameter,A5 installation carbon
+T_factory_truss_base,24.2,h,Not specified,Current code-defined process-hour assumption,Model configuration value,CFS framing process-hours
+T_factory_panel_base,11.7,h,Not specified,Current code-defined process-hour assumption,Model configuration value,CFS framing process-hours
+T_installation_truss_base,18.18,h,Not specified,Current code-defined process-hour assumption,Model configuration value,CFS framing process-hours
+T_installation_panel_base,57.06,h,Not specified,Current code-defined process-hour assumption,Model configuration value,CFS framing process-hours
+k_prefab_site_time_saving,0.6,dimensionless,"(0.4, 0.65)",Current code-defined prefabrication response coefficient,Uncertainty-tested response coefficient,CFS framing process-hours
+k_prefab_a5_carbon_saving,0.35,dimensionless,"(0.3, 0.6)",Current code-defined prefabrication carbon response coefficient,Uncertainty-tested response coefficient,CFS framing A1-A5 carbon
+k_logistics_cost,0.11,dimensionless,"(0.06, 0.18)",Current code-defined logistics response coefficient,Uncertainty-tested response coefficient,CFS framing process cost
+k_logistics_time,0.15,dimensionless,"(0.08, 0.23)",Current code-defined logistics response coefficient,Uncertainty-tested response coefficient,CFS framing process-hours
+k_logistics_carbon,0.04,dimensionless,"(0.02, 0.07)",Current code-defined logistics carbon response coefficient,Uncertainty-tested response coefficient,CFS framing A1-A5 carbon
+opening_complexity_range,"(0.8, 1.3)",dimensionless,"(0.8, 1.3)",Current code-defined decision-variable range,Optimisation search bound,Opening/detailing complexity variable
+P_f_range,"(0.5, 0.9)",fraction,"(0.5, 0.9)",Current code-defined decision-variable range,Optimisation search bound,Prefabrication-level variable
+R_p_range,"(0.0, 1.0)",dimensionless,"(0.0, 1.0)",Current code-defined decision-variable range,Optimisation search bound,Panel rationalisation variable
+R_t_range,"(0.0, 1.0)",dimensionless,"(0.0, 1.0)",Current code-defined decision-variable range,Optimisation search bound,Truss rationalisation variable
